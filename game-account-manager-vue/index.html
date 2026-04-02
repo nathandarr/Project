@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Game Account Manager</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<header>
+    <div>
+        <h1>Game Account Manager</h1>
+        <p>Manage all your game accounts in one place</p>
+    </div>
+</header>
+
+<div class="container">
+    <section class="card">
+        <div class="stats">
+            <div class="stat-box">
+                <h3>Total Accounts</h3>
+                <p id="totalAccounts">0</p>
+            </div>
+            <div class="stat-box">
+                <h3>Total Games</h3>
+                <p id="totalGames">0</p>
+            </div>
+            <div class="stat-box">
+                <h3>Highest Level</h3>
+                <p id="highestLevel">0</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="card">
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <input id="searchInput" class="search-input" type="text" placeholder="Search by game, username, email, or region" />
+                <select id="regionFilter">
+                    <option value="all">All Regions</option>
+                    <option value="OCE">OCE</option>
+                    <option value="Asia">Asia</option>
+                    <option value="EU">EU</option>
+                    <option value="NA">NA</option>
+                </select>
+            </div>
+            <button id="showFormBtn" class="primary-btn">Add Account</button>
+        </div>
+    </section>
+
+    <section id="formSection" class="card hidden">
+        <h2 id="formTitle">Add New Account</h2>
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="gameName">Game Name</label>
+                <input id="gameName" type="text" placeholder="e.g. Valorant" />
+            </div>
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input id="username" type="text" placeholder="e.g. player001" />
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input id="email" type="email" placeholder="e.g. player@email.com" />
+            </div>
+            <div class="form-group">
+                <label for="region">Region / Server</label>
+                <select id="region">
+                    <option value="OCE">OCE</option>
+                    <option value="Asia">Asia</option>
+                    <option value="EU">EU</option>
+                    <option value="NA">NA</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="level">Level</label>
+                <input id="level" type="number" min="1" placeholder="e.g. 50" />
+            </div>
+            <div class="form-group">
+                <label for="status">Status</label>
+                <select id="status">
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group notes-group">
+            <label for="notes">Notes</label>
+            <textarea id="notes" rows="4" placeholder="Add notes about this account"></textarea>
+        </div>
+        <div class="form-actions">
+            <button id="saveBtn" class="primary-btn">Save Account</button>
+            <button id="cancelBtn" class="secondary-btn">Cancel</button>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2>Account List</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>Game</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Region</th>
+                <th>Level</th>
+                <th>Status</th>
+                <th>Notes</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody id="accountTableBody"></tbody>
+        </table>
+    </section>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
