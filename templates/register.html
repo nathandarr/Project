@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 700px;
+            background: white;
+            padding: 40px;
+            border-radius: 14px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #444;
+            font-size: 2rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1rem;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #444;
+        }
+
+        input,
+        select {
+            padding: 12px 14px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            background: #fff;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+        }
+
+        .phone-row {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 12px;
+        }
+
+        .btn-row {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fd8;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .note {
+            margin-top: 18px;
+            font-size: 0.9rem;
+            color: #777;
+            text-align: center;
+        }
+
+        @media (max-width: 700px) {
+            .row,
+            .phone-row {
+                grid-template-columns: 1fr;
+            }
+
+            .form-container {
+                padding: 28px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Create New Account</h1>
+        <p class="subtitle">Fill in your details below to create your account</p>
+
+        <form action="{{ url_for('register') }}" method="POST">
+            <div class="row">
+                <div class="form-group">
+                    <label for="first_name">First Name</label>
+                    <input
+                        type="text"
+                        id="first_name"
+                        name="first_name"
+                        placeholder="Enter your first name"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="last_name">Last Name</label>
+                    <input
+                        type="text"
+                        id="last_name"
+                        name="last_name"
+                        placeholder="Enter your last name"
+                        required
+                    >
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="dob">Date of Birth</label>
+                <input
+                    type="date"
+                    id="dob"
+                    name="dob"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="Enter your email"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="country_code">Phone Number</label>
+                <div class="phone-row">
+                    <select id="country_code" name="country_code" required>
+                        <option value="">Select Country Code</option>
+                        <option value="+61">Australia (+61)</option>
+                        <option value="+1">United States (+1)</option>
+                        <option value="+1">Canada (+1)</option>
+                        <option value="+44">United Kingdom (+44)</option>
+                        <option value="+64">New Zealand (+64)</option>
+                        <option value="+91">India (+91)</option>
+                        <option value="+92">Pakistan (+92)</option>
+                        <option value="+880">Bangladesh (+880)</option>
+                        <option value="+94">Sri Lanka (+94)</option>
+                        <option value="+81">Japan (+81)</option>
+                        <option value="+82">South Korea (+82)</option>
+                        <option value="+86">China (+86)</option>
+                        <option value="+65">Singapore (+65)</option>
+                        <option value="+60">Malaysia (+60)</option>
+                        <option value="+66">Thailand (+66)</option>
+                        <option value="+62">Indonesia (+62)</option>
+                        <option value="+63">Philippines (+63)</option>
+                        <option value="+84">Vietnam (+84)</option>
+                        <option value="+49">Germany (+49)</option>
+                        <option value="+33">France (+33)</option>
+                        <option value="+39">Italy (+39)</option>
+                        <option value="+34">Spain (+34)</option>
+                        <option value="+31">Netherlands (+31)</option>
+                        <option value="+32">Belgium (+32)</option>
+                        <option value="+41">Switzerland (+41)</option>
+                        <option value="+43">Austria (+43)</option>
+                        <option value="+46">Sweden (+46)</option>
+                        <option value="+47">Norway (+47)</option>
+                        <option value="+45">Denmark (+45)</option>
+                        <option value="+358">Finland (+358)</option>
+                        <option value="+353">Ireland (+353)</option>
+                        <option value="+48">Poland (+48)</option>
+                        <option value="+30">Greece (+30)</option>
+                        <option value="+351">Portugal (+351)</option>
+                        <option value="+27">South Africa (+27)</option>
+                        <option value="+20">Egypt (+20)</option>
+                        <option value="+234">Nigeria (+234)</option>
+                        <option value="+254">Kenya (+254)</option>
+                        <option value="+971">United Arab Emirates (+971)</option>
+                        <option value="+966">Saudi Arabia (+966)</option>
+                        <option value="+974">Qatar (+974)</option>
+                        <option value="+965">Kuwait (+965)</option>
+                        <option value="+90">Turkey (+90)</option>
+                        <option value="+7">Russia (+7)</option>
+                        <option value="+55">Brazil (+55)</option>
+                        <option value="+54">Argentina (+54)</option>
+                        <option value="+56">Chile (+56)</option>
+                        <option value="+57">Colombia (+57)</option>
+                        <option value="+52">Mexico (+52)</option>
+                    </select>
+
+                    <input
+                        type="tel"
+                        id="phone_number"
+                        name="phone_number"
+                        placeholder="Enter phone number"
+                        required
+                    >
+                </div>
+            </div>
+
+            <div class="btn-row">
+                <button type="submit" class="btn btn-primary">Create Account</button>
+                <a href="{{ url_for('home') }}" class="btn btn-secondary">Back to Home</a>
+            </div>
+        </form>
+
+        <p class="note">Please make sure your information is entered correctly before submitting.</p>
+    </div>
+</body>
+</html>
