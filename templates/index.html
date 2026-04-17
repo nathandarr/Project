@@ -128,6 +128,24 @@
             font-weight: bold;
         }
 
+        .flash-messages {
+            margin-bottom: 20px;
+            padding: 12px;
+            background: #eef4ff;
+            border: 1px solid #c7d8ff;
+            border-radius: 8px;
+            color: #333;
+            text-align: left;
+        }
+
+        .flash-messages div {
+            margin-bottom: 6px;
+        }
+
+        .flash-messages div:last-child {
+            margin-bottom: 0;
+        }
+
         footer {
             margin-top: 20px;
             color: white;
@@ -152,27 +170,50 @@
     <div class="container">
         <h1 id="project-title">Welcome to Our Game Account Manager Project</h1>
 
-        <p id="project-description">
-            Explore the Page by logging in below or creating a new account
-        </p>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for message in messages %}
+                        <div>{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
 
-        <div id="action-buttons">
-            <div class="top-buttons">
-                <a class="btn" href="{{ url_for('login') }}">Login</a>
-                <a class="btn success" href="{{ url_for('register') }}">Sign Up</a>
-            </div>
+        {% if current_user %}
+            <p id="project-description">
+                You are logged in as <strong>{{ current_user.username }}</strong>.
+            </p>
 
-            <div class="bottom-button">
-                <a class="btn secondary" href="#features">Learn More</a>
+            <div id="action-buttons">
+                <div class="top-buttons">
+                    <a class="btn" href="{{ url_for('mainmenu') }}">Home</a>
+                    <a class="btn secondary" href="{{ url_for('logout') }}">Logout</a>
+                </div>
             </div>
-        </div>
+        {% else %}
+            <p id="project-description">    
+                Explore the page by logging in below or creating a new account
+            </p>
+
+            <div id="action-buttons">
+                <div class="top-buttons">
+                    <a class="btn" href="{{ url_for('login') }}">Login</a>
+                    <a class="btn success" href="{{ url_for('register') }}">Sign Up</a>
+                </div>
+
+                <div class="bottom-button">
+                    <a class="btn secondary" href="#features">Learn More</a>
+                </div>
+            </div>
+        {% endif %}
 
         <div class="features" id="features">
             <h2>Features</h2>
             <ul id="features-list">
-                <li>Feature 1</li>
-                <li>Feature 2</li>
-                <li>Feature 3</li>
+                <li>WEEEE</li>
+                <li>WOOOO</li>
+                <li>WEEEE</li>
             </ul>
         </div>
     </div>
@@ -195,8 +236,6 @@
                 container.style.transform = 'translateY(0)';
             }, 100);
         });
-
-        console.log('Homepage loaded successfully!');
     </script>
 </body>
 </html>

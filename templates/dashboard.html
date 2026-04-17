@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboard - Game Account Manager</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f6fb;
+            color: #222;
+        }
+
+        header {
+            background: #1f2937;
+            color: white;
+            padding: 20px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        header p {
+            margin: 4px 0 0;
+            font-size: 14px;
+            color: #d1d5db;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .header-btn {
+            display: inline-block;
+            padding: 10px 16px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+        }
+
+        .home-btn {
+            background: #2563eb;
+            color: white;
+        }
+
+        .logout-btn {
+            background: #ef4444;
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 14px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .flash-messages {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .flash-message {
+            padding: 12px 14px;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+
+        .flash-success {
+            background: #e8f8ee;
+            color: #1f7a3f;
+            border: 1px solid #b7e4c7;
+        }
+
+        .flash-danger {
+            background: #fff1f1;
+            color: #b02a37;
+            border: 1px solid #f0b6b6;
+        }
+
+        .flash-warning {
+            background: #fff8e6;
+            color: #9a6700;
+            border: 1px solid #f7d58b;
+        }
+
+        .flash-info {
+            background: #eef4ff;
+            color: #1d4ed8;
+            border: 1px solid #c7d8ff;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+        }
+
+        .stat-box {
+            background: #eff6ff;
+            border-radius: 12px;
+            padding: 18px;
+        }
+
+        .stat-box h3 {
+            margin: 0 0 6px;
+            font-size: 15px;
+            color: #374151;
+        }
+
+        .stat-box p {
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
+            color: #1d4ed8;
+        }
+
+        h2 {
+            margin-top: 0;
+        }
+
+        form {
+            margin: 0;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .notes-group {
+            margin-top: 16px;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        .form-actions {
+            margin-top: 18px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button,
+        .link-btn {
+            border: none;
+            border-radius: 10px;
+            padding: 10px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .primary-btn {
+            background: #2563eb;
+            color: white;
+        }
+
+        .primary-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .secondary-btn {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        .secondary-btn:hover {
+            background: #d1d5db;
+        }
+
+        .danger-btn {
+            background: #ef4444;
+            color: white;
+        }
+
+        .danger-btn:hover {
+            background: #dc2626;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+
+        thead {
+            background: #1f2937;
+            color: white;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 14px 12px;
+            border-bottom: 1px solid #e5e7eb;
+            vertical-align: top;
+        }
+
+        tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .inline-form {
+            display: inline;
+        }
+
+        .tag {
+            display: inline-block;
+            background: #dbeafe;
+            color: #1d4ed8;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #666;
+            padding: 24px 8px;
+        }
+
+        @media (max-width: 900px) {
+            table,
+            thead,
+            tbody,
+            th,
+            td,
+            tr {
+                display: block;
+            }
+
+            thead {
+                display: none;
+            }
+
+            tbody tr {
+                margin-bottom: 16px;
+                border: 1px solid #e5e7eb;
+                border-radius: 12px;
+                overflow: hidden;
+                background: white;
+            }
+
+            td {
+                display: flex;
+                justify-content: space-between;
+                gap: 16px;
+                padding: 12px;
+            }
+
+            td::before {
+                content: attr(data-label);
+                font-weight: bold;
+                color: #374151;
+                min-width: 110px;
+            }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div>
+        <h1>Game Account Manager</h1>
+        <p>Welcome, {{ user.username }} — manage your own games, levels, ranks, and notes.</p>
+    </div>
+
+    <div class="header-actions">
+        <a href="{{ url_for('home') }}" class="header-btn home-btn">Home</a>
+        <a href="{{ url_for('logout') }}" class="header-btn logout-btn">Logout</a>
+    </div>
+</header>
+
+<div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <section class="card">
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+    {% endwith %}
+
+    <section class="card">
+        <div class="stats">
+            <div class="stat-box">
+                <h3>Total Accounts</h3>
+                <p>{{ total_accounts }}</p>
+            </div>
+            <div class="stat-box">
+                <h3>Total Games</h3>
+                <p>{{ total_games }}</p>
+            </div>
+            <div class="stat-box">
+                <h3>Highest Level</h3>
+                <p>{{ highest_level }}</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2>{{ "Edit Game Account" if editing_account else "Add New Game Account" }}</h2>
+
+        <form method="POST" action="{% if editing_account %}{{ url_for('update_account', account_id=editing_account.id) }}{% else %}{{ url_for('add_account') }}{% endif %}">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="game_name">Game Name</label>
+                    <input
+                        id="game_name"
+                        name="game_name"
+                        type="text"
+                        placeholder="e.g. Valorant"
+                        value="{{ editing_account.game_name if editing_account else '' }}"
+                        required
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label for="account_name">Account Name</label>
+                    <input
+                        id="account_name"
+                        name="account_name"
+                        type="text"
+                        placeholder="e.g. aceShot"
+                        value="{{ editing_account.account_name if editing_account else '' }}"
+                        required
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label for="region">Region / Server</label>
+                    <select id="region" name="region" required>
+                        {% set selected_region = editing_account.region if editing_account else 'OCE' %}
+                        <option value="OCE" {% if selected_region == 'OCE' %}selected{% endif %}>OCE</option>
+                        <option value="Asia" {% if selected_region == 'Asia' %}selected{% endif %}>Asia</option>
+                        <option value="EU" {% if selected_region == 'EU' %}selected{% endif %}>EU</option>
+                        <option value="NA" {% if selected_region == 'NA' %}selected{% endif %}>NA</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="level">Level</label>
+                    <input
+                        id="level"
+                        name="level"
+                        type="number"
+                        min="1"
+                        placeholder="e.g. 50"
+                        value="{{ editing_account.level if editing_account else '' }}"
+                        required
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label for="rank">Rank</label>
+                    <input
+                        id="rank"
+                        name="rank"
+                        type="text"
+                        placeholder="e.g. Gold, Diamond, Immortal"
+                        value="{{ editing_account.rank if editing_account else '' }}"
+                        required
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    {% set selected_status = editing_account.status if editing_account else 'Active' %}
+                    <select id="status" name="status" required>
+                        <option value="Active" {% if selected_status == 'Active' %}selected{% endif %}>Active</option>
+                        <option value="Inactive" {% if selected_status == 'Inactive' %}selected{% endif %}>Inactive</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group notes-group">
+                <label for="notes">Notes</label>
+                <textarea
+                    id="notes"
+                    name="notes"
+                    rows="4"
+                    placeholder="Add notes about this account"
+                >{{ editing_account.notes if editing_account else '' }}</textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="primary-btn">
+                    {{ "Update Account" if editing_account else "Save Account" }}
+                </button>
+
+                {% if editing_account %}
+                    <a href="{{ url_for('dashboard') }}" class="link-btn secondary-btn">Cancel Edit</a>
+                {% endif %}
+            </div>
+        </form>
+    </section>
+
+    <section class="card">
+        <h2>Your Game Accounts</h2>
+
+        {% if accounts %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Game</th>
+                        <th>Account Name</th>
+                        <th>Region</th>
+                        <th>Level</th>
+                        <th>Rank</th>
+                        <th>Status</th>
+                        <th>Notes</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for account in accounts %}
+                        <tr>
+                            <td data-label="Game">{{ account.game_name }}</td>
+                            <td data-label="Account Name">{{ account.account_name }}</td>
+                            <td data-label="Region">{{ account.region }}</td>
+                            <td data-label="Level">{{ account.level }}</td>
+                            <td data-label="Rank">{{ account.rank }}</td>
+                            <td data-label="Status">
+                                <span class="tag">{{ account.status }}</span>
+                            </td>
+                            <td data-label="Notes">{{ account.notes or "-" }}</td>
+                            <td data-label="Actions">
+                                <div class="actions">
+                                    <a href="{{ url_for('dashboard', edit=account.id) }}" class="link-btn secondary-btn">Edit</a>
+
+                                    <form class="inline-form" method="POST" action="{{ url_for('delete_account', account_id=account.id) }}" onsubmit="return confirm('Delete this account?');">
+                                        <button type="submit" class="danger-btn">Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="empty-state">
+                <p>No game accounts yet. Add your first one above.</p>
+            </div>
+        {% endif %}
+    </section>
+</div>
+</body>
+</html>

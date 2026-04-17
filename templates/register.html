@@ -42,8 +42,25 @@
         .subtitle {
             text-align: center;
             color: #666;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             font-size: 1rem;
+        }
+
+        .flash-messages {
+            margin-bottom: 20px;
+            padding: 14px;
+            background: #fff1f1;
+            border: 1px solid #f0b6b6;
+            border-radius: 8px;
+            color: #b02a37;
+        }
+
+        .flash-messages div {
+            margin-bottom: 6px;
+        }
+
+        .flash-messages div:last-child {
+            margin-bottom: 0;
         }
 
         form {
@@ -157,6 +174,16 @@
         <h1>Create New Account</h1>
         <p class="subtitle">Fill in your details below to create your account</p>
 
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for message in messages %}
+                        <div>{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
         <form action="{{ url_for('register') }}" method="POST">
             <div class="row">
                 <div class="form-group">
@@ -192,15 +219,29 @@
                 >
             </div>
 
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    placeholder="Enter your email"
-                    required
-                >
+            <div class="row">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        placeholder="Choose a username"
+                        minlength="3"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="Enter your email"
+                        required
+                    >
+                </div>
             </div>
 
             <div class="form-group">
@@ -269,13 +310,39 @@
                 </div>
             </div>
 
+            <div class="row">
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Create a password"
+                        minlength="8"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm_password">Confirm Password</label>
+                    <input
+                        type="password"
+                        id="confirm_password"
+                        name="confirm_password"
+                        placeholder="Re-enter your password"
+                        minlength="8"
+                        required
+                    >
+                </div>
+            </div>
+
             <div class="btn-row">
                 <button type="submit" class="btn btn-primary">Create Account</button>
                 <a href="{{ url_for('home') }}" class="btn btn-secondary">Back to Home</a>
             </div>
         </form>
 
-        <p class="note">Please make sure your information is entered correctly before submitting.</p>
+        <p class="note">If your username or email is already taken, sign in instead or choose a different one.</p>
     </div>
 </body>
 </html>
