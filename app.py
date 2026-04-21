@@ -34,6 +34,7 @@ class User(db.Model):
     username: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+    is_admin: Mapped[bool] = mapped_column(default=False)  # Add this line
 
     game_accounts: Mapped[list["GameAccount"]] = relationship(
         "GameAccount",
@@ -41,6 +42,7 @@ class User(db.Model):
         cascade="all, delete-orphan",
         order_by="GameAccount.id.desc()"
     )
+    
 
     def set_password(self, password: str) -> None:
         self.password_hash = generate_password_hash(password)
