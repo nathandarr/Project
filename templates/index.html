@@ -182,17 +182,18 @@
 
         {% if current_user %}
             <p id="project-description">
-                You are logged in as <strong>{{ current_user.username }}</strong>.
-            </p>
+             You are logged in as <strong>{{ current_user.username }}</strong>.
+           </p>
 
             <div id="action-buttons">
                 <div class="top-buttons">
                     <a class="btn" href="{{ url_for('mainmenu') }}">Home</a>
+                    <a class="btn success" href="{{ url_for('players') }}">Players</a>
                     <a class="btn secondary" href="{{ url_for('logout') }}">Logout</a>
-                </div>
+             </div>
             </div>
         {% else %}
-            <p id="project-description">    
+            <p id="project-description">
                 Explore the page by logging in below or creating a new account
             </p>
 

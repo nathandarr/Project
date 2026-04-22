@@ -321,10 +321,12 @@
         <p>Welcome, {{ user.username }} — manage your own games, levels, ranks, and notes.</p>
     </div>
 
-    <div class="header-actions">
+   <div class="header-actions">
         <a href="{{ url_for('home') }}" class="header-btn home-btn">Home</a>
-        <a href="{{ url_for('logout') }}" class="header-btn logout-btn">Logout</a>
-    </div>
+     <a href="{{ url_for('profile') }}" class="header-btn home-btn">Profile</a>
+     <a href="{{ url_for('players') }}" class="header-btn home-btn">Players</a>
+     <a href="{{ url_for('logout') }}" class="header-btn logout-btn">Logout</a>
+</div>
 </header>
 
 <div class="container">
