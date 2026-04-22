@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .page {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .topbar h1 {
+            color: white;
+            font-size: 2rem;
+        }
+
+        .topbar-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 22px;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fd8;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .card {
+            background: white;
+            padding: 32px;
+            border-radius: 14px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .flash-messages {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .flash-message {
+            padding: 14px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .flash-success {
+            background: #e8f8ee;
+            color: #1f7a3f;
+            border: 1px solid #b7e4c7;
+        }
+
+        .flash-danger {
+            background: #fff1f1;
+            color: #b02a37;
+            border: 1px solid #f0b6b6;
+        }
+
+        .flash-warning {
+            background: #fff8e6;
+            color: #9a6700;
+            border: 1px solid #f7d58b;
+        }
+
+        .flash-info {
+            background: #eef4ff;
+            color: #1d4ed8;
+            border: 1px solid #c7d8ff;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .section-title {
+            margin-top: 10px;
+            margin-bottom: -4px;
+            color: #444;
+            font-size: 1.1rem;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .phone-row {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 12px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #444;
+        }
+
+        input,
+        select {
+            padding: 12px 14px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            background: #fff;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+        }
+
+        .btn-row {
+            display: flex;
+            justify-content: flex-start;
+            gap: 12px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 700px) {
+            .row,
+            .phone-row {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 24px 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="topbar">
+            <h1>My Profile</h1>
+            <div class="topbar-actions">
+                <a class="btn btn-secondary" href="{{ url_for('dashboard') }}">Dashboard</a>
+                <a class="btn btn-secondary" href="{{ url_for('logout') }}">Logout</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <p class="subtitle">Update your account details and password.</p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <form action="{{ url_for('profile') }}" method="POST">
+                <h2 class="section-title">Personal Details</h2>
+
+                <div class="row">
+                    <div class="form-group">
+                        <label for="first_name">First Name</label>
+                        <input type="text" id="first_name" name="first_name" value="{{ user.first_name or '' }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="last_name">Last Name</label>
+                        <input type="text" id="last_name" name="last_name" value="{{ user.last_name or '' }}" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="dob">Date of Birth</label>
+                    <input type="date" id="dob" name="dob" value="{{ user.dob.isoformat() if user.dob else '' }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone_number">Phone Number</label>
+                    <div class="phone-row">
+                        <select id="country_code" name="country_code" required>
+                            <option value="">Select Country Code</option>
+                            <option value="+61" {% if user.country_code == '+61' %}selected{% endif %}>Australia (+61)</option>
+                            <option value="+1" {% if user.country_code == '+1' %}selected{% endif %}>United States / Canada (+1)</option>
+                            <option value="+44" {% if user.country_code == '+44' %}selected{% endif %}>United Kingdom (+44)</option>
+                            <option value="+64" {% if user.country_code == '+64' %}selected{% endif %}>New Zealand (+64)</option>
+                            <option value="+91" {% if user.country_code == '+91' %}selected{% endif %}>India (+91)</option>
+                            <option value="+81" {% if user.country_code == '+81' %}selected{% endif %}>Japan (+81)</option>
+                            <option value="+82" {% if user.country_code == '+82' %}selected{% endif %}>South Korea (+82)</option>
+                            <option value="+65" {% if user.country_code == '+65' %}selected{% endif %}>Singapore (+65)</option>
+                            <option value="+49" {% if user.country_code == '+49' %}selected{% endif %}>Germany (+49)</option>
+                            <option value="+33" {% if user.country_code == '+33' %}selected{% endif %}>France (+33)</option>
+                        </select>
+
+                        <input type="text" id="phone_number" name="phone_number" placeholder="Enter your phone number" value="{{ user.phone_number or '' }}" required>
+                    </div>
+                </div>
+
+                <h2 class="section-title">Account Details</h2>
+
+                <div class="row">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" value="{{ user.username }}" minlength="3" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" value="{{ user.email }}" required>
+                    </div>
+                </div>
+
+                <h2 class="section-title">Change Password</h2>
+
+                <div class="row">
+                    <div class="form-group">
+                        <label for="current_password">Current Password</label>
+                        <input type="password" id="current_password" name="current_password" placeholder="Enter current password">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">New Password</label>
+                        <input type="password" id="password" name="password" placeholder="Enter new password">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm_password">Confirm New Password</label>
+                    <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm new password">
+                </div>
+
+                <div class="btn-row">
+                    <button class="btn btn-primary" type="submit">Save Profile</button>
+                    <a class="btn btn-secondary" href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

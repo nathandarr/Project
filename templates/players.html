@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Players - Game Account Manager</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f6fb;
+            color: #222;
+        }
+
+        header {
+            background: #1f2937;
+            color: white;
+            padding: 20px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        header p {
+            margin: 4px 0 0;
+            font-size: 14px;
+            color: #d1d5db;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .header-btn {
+            display: inline-block;
+            padding: 10px 16px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+        }
+
+        .home-btn {
+            background: #2563eb;
+            color: white;
+        }
+
+        .logout-btn {
+            background: #ef4444;
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .flash-messages {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .flash-message {
+            padding: 12px 14px;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+
+        .flash-success {
+            background: #e8f8ee;
+            color: #1f7a3f;
+            border: 1px solid #b7e4c7;
+        }
+
+        .flash-danger {
+            background: #fff1f1;
+            color: #b02a37;
+            border: 1px solid #f0b6b6;
+        }
+
+        .flash-warning {
+            background: #fff8e6;
+            color: #9a6700;
+            border: 1px solid #f7d58b;
+        }
+
+        .flash-info {
+            background: #eef4ff;
+            color: #1d4ed8;
+            border: 1px solid #c7d8ff;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 18px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 14px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            padding: 22px;
+        }
+
+        .card h2 {
+            margin: 0 0 8px;
+            font-size: 22px;
+        }
+
+        .muted {
+            color: #666;
+            margin-bottom: 16px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .stat-box {
+            background: #eff6ff;
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .stat-box strong {
+            display: block;
+            font-size: 20px;
+            color: #1d4ed8;
+        }
+
+        .featured {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+
+        .featured h3 {
+            margin: 0 0 8px;
+            font-size: 15px;
+        }
+
+        .featured p {
+            margin: 4px 0;
+            font-size: 14px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 14px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            background: #2563eb;
+            color: white;
+        }
+
+        .empty-state {
+            background: white;
+            border-radius: 14px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            padding: 28px;
+            text-align: center;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div>
+        <h1>Players</h1>
+        <p>Browse other players and view their game account profiles.</p>
+    </div>
+
+    <div class="header-actions">
+        <a href="{{ url_for('mainmenu') }}" class="header-btn home-btn">Home</a>
+        <a href="{{ url_for('dashboard') }}" class="header-btn home-btn">Dashboard</a>
+        <a href="{{ url_for('logout') }}" class="header-btn logout-btn">Logout</a>
+    </div>
+</header>
+
+<div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    {% if players %}
+        <div class="grid">
+            {% for item in players %}
+                <section class="card">
+                    <h2>{{ item.user.username }}</h2>
+                    <div class="muted">
+                        {{ item.user.full_name if item.user.full_name else item.user.username }}
+                    </div>
+
+                    <div class="stats">
+                        <div class="stat-box">
+                            <strong>{{ item.total_accounts }}</strong>
+                            Accounts
+                        </div>
+                        <div class="stat-box">
+                            <strong>{{ item.total_games }}</strong>
+                            Games
+                        </div>
+                        <div class="stat-box">
+                            <strong>{{ item.highest_level }}</strong>
+                            Top Level
+                        </div>
+                    </div>
+
+                    {% if item.featured_account %}
+                        <div class="featured">
+                            <h3>Featured Account</h3>
+                            <p><strong>Game:</strong> {{ item.featured_account.game_name }}</p>
+                            <p><strong>Rank:</strong> {{ item.featured_account.rank }}</p>
+                            <p><strong>Region:</strong> {{ item.featured_account.region }}</p>
+                            <p><strong>Status:</strong> {{ item.featured_account.status }}</p>
+                        </div>
+                    {% else %}
+                        <div class="featured">
+                            <h3>No game accounts yet</h3>
+                            <p>This player has not added any game accounts.</p>
+                        </div>
+                    {% endif %}
+
+                    <a class="btn" href="{{ url_for('public_profile', user_id=item.user.id) }}">View Profile</a>
+                </section>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            No other players found yet.
+        </div>
+    {% endif %}
+</div>
+</body>
+</html>
