@@ -10,7 +10,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from werkzeug.security import check_password_hash, generate_password_hash
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-INSTANCE_DIR = os.path.join(BASE_DIR, "Instance")
+INSTANCE_DIR = os.path.join(BASE_DIR, "instance")
 DB_PATH = os.path.join(INSTANCE_DIR, "app.db")
 
 os.makedirs(INSTANCE_DIR, exist_ok=True)
