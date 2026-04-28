@@ -88,7 +88,18 @@
       text-align: center;
       font-size: 14px;
       min-height: 18px;
+    }
+    
+    .message.success {
+      color: rgb(40, 167, 69);
+    }
+    
+    .message.danger {
       color: rgb(200, 60, 60);
+    }
+    
+    .message.warning {
+      color: rgb(255, 153, 0);
     }
 
     .back-link {
@@ -131,11 +142,13 @@
   <div class="login-container">
     <h1>Login</h1>
 
-    {% with messages = get_flashed_messages() %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
-        <div class="message">
-          {{ messages[0] }}
-        </div>
+        {% for category, message in messages %}
+          <div class="message {{ category }}">
+            {{ message }}
+          </div>
+        {% endfor %}
       {% endif %}
     {% endwith %}
 
