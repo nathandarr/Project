@@ -8,6 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Date, DateTime, ForeignKey, Integer, String, func, inspect, or_, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.utils import secure_filename
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 INSTANCE_DIR = os.path.join(BASE_DIR, "instance")
@@ -19,6 +20,13 @@ app = Flask(__name__, template_folder="templates", static_folder="static")
 app.secret_key = os.environ.get("SECRET_KEY", "change-this-secret-key")
 app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads")
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
+def allowed_file(filename: str) -> bool:
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 db = SQLAlchemy(app)
 
@@ -41,7 +49,7 @@ class User(db.Model):
     email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     is_admin: Mapped[bool] = mapped_column(default=False)
-
+    avatar_path: Mapped[str | None] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime,
@@ -123,7 +131,9 @@ def add_missing_user_profile_columns() -> None:
         statements.append("ALTER TABLE users ADD COLUMN created_at DATETIME")
     if "updated_at" not in existing_columns:
         statements.append("ALTER TABLE users ADD COLUMN updated_at DATETIME")
-
+    if "avatar_path" not in existing_columns:
+        statements.append("ALTER TABLE users ADD COLUMN avatar_path VARCHAR(255)")
+    
     if not statements:
         return
 
@@ -695,6 +705,36 @@ def profile():
         return redirect(url_for("profile"))
 
     return render_template("profile.html", user=user)
+
+@app.route("/profile/avatar", methods=["POST"])
+@login_required
+def upload_avatar():
+    user = get_current_user()
+    if user is None:
+        return redirect(url_for("login"))
+
+    if "avatar" not in request.files:
+        flash("No file selected.", "danger")
+        return redirect(url_for("profile"))
+
+    file = request.files["avatar"]
+
+    if file.filename == "":
+        flash("No file selected.", "danger")
+        return redirect(url_for("profile"))
+
+    if not allowed_file(file.filename):
+        flash("Only PNG, JPG, GIF and WEBP files are allowed.", "danger")
+        return redirect(url_for("profile"))
+
+    filename = secure_filename(f"user_{user.id}_{file.filename}")
+    file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+
+    user.avatar_path = f"uploads/{filename}"
+    db.session.commit()
+
+    flash("Profile picture updated!", "success")
+    return redirect(url_for("profile"))
 
 @app.route("/players")
 @login_required
