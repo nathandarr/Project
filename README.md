@@ -1,4 +1,4 @@
-# CITS3493 Group Project
+# CITS3403 Group Project
 
 ## Project Overview and Features
 
