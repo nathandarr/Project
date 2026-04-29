@@ -286,8 +286,14 @@
 </head>
 <body>
 <header>
-    <div>
-        <h1>{{ profile_user.username }}'s Profile</h1>
+    <div style="display: flex; align-items: center; gap: 16px;">
+        <img
+            src="{{ url_for('static', filename=profile_user.avatar_path) if profile_user.avatar_path else 'https://ui-avatars.com/api/?name=' + (profile_user.username | urlencode) + '&size=70&background=667eea&color=fff' }}"
+            alt="{{ profile_user.username }}"
+            style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 3px solid white;"
+        />
+        <div>
+            <h1>{{ profile_user.username }}'s Profile</h1>
         <p>
             {% if profile_user.full_name %}
                 {{ profile_user.full_name }}
@@ -295,6 +301,7 @@
                 Public player profile
             {% endif %}
         </p>
+        </div>
     </div>
 
     <div class="header-actions">

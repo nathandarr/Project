@@ -212,7 +212,22 @@
 
         <div class="card">
             <p class="subtitle">Update your account details and password.</p>
-
+            
+                <div style="display: flex; align-items: center; gap: 24px; margin-bottom: 24px;">
+                    <img
+                        src="{{ url_for('static', filename=user.avatar_path) if user.avatar_path else 'https://ui-avatars.com/api/?name=' + (user.username | urlencode) + '&size=100&background=667eea&color=fff' }}"
+                        alt="Profile picture"
+                        style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #667eea;"
+                    />
+                    <form action="{{ url_for('upload_avatar') }}" method="POST" enctype="multipart/form-data">
+                        <label style="font-weight: 600; color: #444; display: block; margin-bottom: 8px;">
+                            Upload Profile Picture
+                        </label>
+                        <input type="file" name="avatar" accept="image/*" required
+                            style="margin-bottom: 10px; display: block;">
+                        <button type="submit" class="btn btn-primary">Upload</button>
+                    </form>
+                </div>
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     <div class="flash-messages">
