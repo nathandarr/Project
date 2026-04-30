@@ -403,7 +403,12 @@
                 {% for comment in comments %}
                     <div class="comment-item">
                         <div class="comment-meta">
-                            <div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <img
+                                    src="{{ url_for('static', filename=comment.author.avatar_path) if comment.author.avatar_path else 'https://ui-avatars.com/api/?name=' + (comment.author.username | urlencode) + '&size=36&background=667eea&color=fff' }}"
+                                    alt="{{ comment.author.username }}"
+                                    style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid #e5e7eb;"
+                                />
                                 <strong>{{ comment.author.username }}</strong>
                             </div>
                             <div>
