@@ -316,9 +316,16 @@
 </head>
 <body>
 <header>
-    <div>
-        <h1>Game Account Manager</h1>
-        <p>Welcome, {{ user.username }} — manage your own games, levels, ranks, and notes.</p>
+    <div style="display: flex; align-items: center; gap: 16px;">
+        <img
+            src="{{ url_for('static', filename=user.avatar_path) if user.avatar_path else 'https://ui-avatars.com/api/?name=' + (user.username | urlencode) + '&size=60&background=667eea&color=fff' }}"
+            alt="{{ user.username }}"
+            style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid white;"
+        />
+        <div>
+            <h1>Game Account Manager</h1>
+            <p>Welcome, {{ user.username }} — manage your own games, levels, ranks, and notes.</p>
+        </div>
     </div>
 
    <div class="header-actions">
