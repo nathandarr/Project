@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Dashboard - Game Account Manager</title>
+
     <style>
         * {
             box-sizing: border-box;
@@ -276,6 +277,170 @@
             padding: 24px 8px;
         }
 
+        #chat-button {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            background: #2563eb;
+            color: white;
+            padding: 13px 18px;
+            border-radius: 999px;
+            cursor: pointer;
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.25);
+            z-index: 9998;
+            font-weight: 700;
+            user-select: none;
+        }
+
+        #chat-button:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        #chat-box {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            left: auto;
+            width: 420px;
+            height: 540px;
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.22);
+            border: 1px solid #e5e7eb;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 9999;
+        }
+
+        #chat-header {
+            background: #1f2937;
+            color: white;
+            padding: 14px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+        }
+
+        #chat-close {
+            background: rgba(255, 255, 255, 0.12);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        #chat-close:hover {
+            background: rgba(255, 255, 255, 0.22);
+        }
+
+        #chat-body {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+        }
+
+        #chat-users {
+            width: 36%;
+            background: #f9fafb;
+            border-right: 1px solid #e5e7eb;
+            overflow-y: auto;
+        }
+
+        .chat-user {
+            padding: 13px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+            color: #374151;
+        }
+
+        .chat-user:hover {
+            background: #eef2ff;
+        }
+
+        .chat-user.active {
+            background: #dbeafe;
+            color: #1d4ed8;
+            font-weight: 700;
+        }
+
+        #chat-panel {
+            width: 64%;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        #chat-selected-user {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            font-weight: 700;
+            color: #111827;
+            background: white;
+        }
+
+        #chat-messages {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+            background: #f8fafc;
+            min-height: 0;
+        }
+
+        .chat-message {
+            margin-bottom: 10px;
+            padding: 9px 10px;
+            border-radius: 10px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            color: #374151;
+            font-size: 13px;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+
+        #chat-input-area {
+            display: flex;
+            gap: 8px;
+            padding: 12px;
+            border-top: 1px solid #e5e7eb;
+            background: white;
+        }
+
+        #chat-input {
+            flex: 1;
+            min-width: 0;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            font-size: 14px;
+        }
+
+        #chat-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        #chat-send {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 13px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        #chat-send:hover {
+            background: #1d4ed8;
+        }
+
         @media (max-width: 900px) {
             table,
             thead,
@@ -311,9 +476,40 @@
                 color: #374151;
                 min-width: 110px;
             }
+
+            #chat-box {
+                right: 12px;
+                bottom: 12px;
+                width: calc(100vw - 24px);
+                height: 520px;
+            }
+
+            #chat-button {
+                right: 12px;
+                bottom: 12px;
+            }
+        }
+
+        @media (max-width: 520px) {
+            #chat-body {
+                flex-direction: column;
+            }
+
+            #chat-users {
+                width: 100%;
+                max-height: 120px;
+                border-right: none;
+                border-bottom: 1px solid #e5e7eb;
+            }
+
+            #chat-panel {
+                width: 100%;
+                flex: 1;
+            }
         }
     </style>
 </head>
+
 <body>
 <header>
     <div>
@@ -321,12 +517,12 @@
         <p>Welcome, {{ user.username }} — manage your own games, levels, ranks, and notes.</p>
     </div>
 
-   <div class="header-actions">
+    <div class="header-actions">
         <a href="{{ url_for('home') }}" class="header-btn home-btn">Home</a>
-     <a href="{{ url_for('profile') }}" class="header-btn home-btn">Profile</a>
-     <a href="{{ url_for('players') }}" class="header-btn home-btn">Players</a>
-     <a href="{{ url_for('logout') }}" class="header-btn logout-btn">Logout</a>
-</div>
+        <a href="{{ url_for('profile') }}" class="header-btn home-btn">Profile</a>
+        <a href="{{ url_for('players') }}" class="header-btn home-btn">Players</a>
+        <a href="{{ url_for('logout') }}" class="header-btn logout-btn">Logout</a>
+    </div>
 </header>
 
 <div class="container">
@@ -348,10 +544,12 @@
                 <h3>Total Accounts</h3>
                 <p>{{ total_accounts }}</p>
             </div>
+
             <div class="stat-box">
                 <h3>Total Games</h3>
                 <p>{{ total_games }}</p>
             </div>
+
             <div class="stat-box">
                 <h3>Highest Level</h3>
                 <p>{{ highest_level }}</p>
@@ -473,6 +671,7 @@
                         <th>Actions</th>
                     </tr>
                 </thead>
+
                 <tbody>
                     {% for account in accounts %}
                         <tr>
@@ -505,5 +704,148 @@
         {% endif %}
     </section>
 </div>
+
+<div id="chat-button">Chat</div>
+
+<div id="chat-box">
+    <div id="chat-header">
+        <span>Direct Messages</span>
+        <button id="chat-close" type="button">X</button>
+    </div>
+
+    <div id="chat-body">
+        <div id="chat-users"></div>
+
+        <div id="chat-panel">
+            <div id="chat-selected-user">Select a player</div>
+            <div id="chat-messages"></div>
+
+            <div id="chat-input-area">
+                <input type="text" id="chat-input" placeholder="Type message..." maxlength="200" />
+                <button id="chat-send" type="button">Send</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const chatButton = document.getElementById("chat-button");
+    const chatBox = document.getElementById("chat-box");
+    const chatClose = document.getElementById("chat-close");
+    const chatUsers = document.getElementById("chat-users");
+    const chatMessages = document.getElementById("chat-messages");
+    const chatInput = document.getElementById("chat-input");
+    const chatSend = document.getElementById("chat-send");
+    const chatSelectedUser = document.getElementById("chat-selected-user");
+
+    let selectedUserId = null;
+    let selectedUsername = null;
+
+    chatButton.addEventListener("click", function () {
+        chatBox.style.display = "flex";
+        chatButton.style.display = "none";
+        loadUsers();
+    });
+
+    chatClose.addEventListener("click", function () {
+        chatBox.style.display = "none";
+        chatButton.style.display = "block";
+    });
+
+    function loadUsers() {
+        fetch("/chat/users")
+            .then(response => response.json())
+            .then(users => {
+                chatUsers.innerHTML = "";
+
+                users.forEach(user => {
+                    const div = document.createElement("div");
+                    div.className = "chat-user";
+                    div.textContent = user.username;
+
+                    div.addEventListener("click", function () {
+                        selectedUserId = user.id;
+                        selectedUsername = user.username;
+                        chatSelectedUser.textContent = "Chat with " + selectedUsername;
+
+                        document.querySelectorAll(".chat-user").forEach(item => {
+                            item.classList.remove("active");
+                        });
+
+                        div.classList.add("active");
+                        loadDM();
+                    });
+
+                    chatUsers.appendChild(div);
+                });
+            });
+    }
+
+    function loadDM() {
+        if (!selectedUserId) {
+            return;
+        }
+
+        fetch("/chat/dm/" + selectedUserId)
+            .then(response => response.json())
+            .then(messages => {
+                chatMessages.innerHTML = "";
+
+                messages.forEach(msg => {
+                    const div = document.createElement("div");
+                    div.className = "chat-message";
+                    div.textContent = "[" + msg.created_at + "] " + msg.sender + ": " + msg.content;
+                    chatMessages.appendChild(div);
+                });
+
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            });
+    }
+
+    function sendDM() {
+        const content = chatInput.value.trim();
+
+        if (!selectedUserId) {
+            alert("Select a player first");
+            return;
+        }
+
+        if (content === "") {
+            return;
+        }
+
+        fetch("/chat/dm/send", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                receiver_id: selectedUserId,
+                content: content
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    chatInput.value = "";
+                    loadDM();
+                }
+            });
+    }
+
+    chatSend.addEventListener("click", sendDM);
+
+    chatInput.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+            sendDM();
+        }
+    });
+
+    setInterval(function () {
+        if (chatBox.style.display === "flex" && selectedUserId) {
+            loadDM();
+        }
+    }, 3000);
+</script>
 </body>
 </html>
