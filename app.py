@@ -986,7 +986,7 @@ def api_update_account(account_id: int):
     if account is None:
         return jsonify({"error": "Account not found."}), 404
 
-    source = request.get_json(silent=True) or {}
+    source = request.get_json(silent=True) or 
     payload, errors = validate_account_payload(source)
 
     if errors:
@@ -1025,7 +1025,6 @@ def api_delete_account(account_id: int):
     db.session.commit()
 
     return jsonify({"message": "Game account deleted successfully."})
-
 
 if __name__ == "__main__":
     app.run(debug=True)
