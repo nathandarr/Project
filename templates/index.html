@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Home</title>
+    <title>GameVault</title>
     <style>
         * {
             margin: 0;
@@ -80,7 +80,7 @@
         }
 
         .btn:hover {
-            background: #764ba2;
+            background: #5a6fd8;
         }
 
         .btn.secondary {
@@ -128,6 +128,11 @@
             font-weight: bold;
         }
 
+        .features li {
+            color: white;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
         .flash-messages {
             margin-bottom: 20px;
             padding: 12px;
@@ -164,11 +169,22 @@
                 text-align: center;
             }
         }
+        .profile-btn {
+            background: #764ba2;
+        }
+
+        .profile-btn:hover {
+            background: #5e3a85;
+        }
+    
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 id="project-title">Welcome to Our Game Account Manager Project</h1>
+        <h1 id="project-title">Welcome to GameVault</h1>
+        <p style="color: #888; font-size: 1rem; margin-top: -15px; margin-bottom: 15px; font-style: italic;">
+            All your game accounts, in one place.
+        </p>
 
         {% with messages = get_flashed_messages() %}
             {% if messages %}
@@ -181,16 +197,24 @@
         {% endwith %}
 
         {% if current_user %}
-            <p id="project-description">
-             You are logged in as <strong>{{ current_user.username }}</strong>.
-           </p>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 16px;">
+                <img
+                    src="{{ url_for('static', filename=current_user.avatar_path) if current_user.avatar_path else 'https://ui-avatars.com/api/?name=' + (current_user.username | urlencode) + '&size=70&background=667eea&color=fff' }}"
+                    alt="{{ current_user.username }}"
+                    style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 3px solid #667eea;"
+                />
+                <p id="project-description">
+                    You are logged in as <strong>{{ current_user.username }}</strong>.
+                </p>
+            </div>
 
             <div id="action-buttons">
-                <div class="top-buttons">
-                    <a class="btn" href="{{ url_for('mainmenu') }}">Home</a>
-                    <a class="btn success" href="{{ url_for('players') }}">Players</a>
-                    <a class="btn secondary" href="{{ url_for('logout') }}">Logout</a>
-             </div>
+                <div class="top-buttons" style="flex-direction: column; align-items: center;">
+                    <a class="btn success" style="width: 200px; text-align: center;" href="{{ url_for('dashboard') }}">Dashboard</a>
+                    <a class="btn" style="width: 200px; text-align: center;" href="{{ url_for('players') }}">Players</a>
+                    <a class="btn profile-btn" style="width: 200px; text-align: center;" href="{{ url_for('profile') }}">Profile</a>
+                    <a class="btn secondary" style="width: 200px; text-align: center;" href="{{ url_for('logout') }}">Logout</a>
+                </div>
             </div>
         {% else %}
             <p id="project-description">
@@ -209,18 +233,20 @@
             </div>
         {% endif %}
 
-        <div class="features" id="features">
-            <h2>Features</h2>
+        <div class="features" id="features" style="background: #1f2937; border-radius: 10px; padding: 20px; margin-top: 20px;">
+            <h2 style="color: white;">Features</h2>
             <ul id="features-list">
-                <li>WEEEE</li>
-                <li>WOOOO</li>
-                <li>WEEEE</li>
+                <li>Track game accounts across multiple games</li>
+                <li>View player profiles and rankings</li>
+                <li>Comment on other players' profiles</li>
+                <li>Upload a profile picture</li>
+                <li>Manage account rank, level and region</li>
             </ul>
         </div>
     </div>
 
     <footer>
-        &copy; <span id="year"></span> our group name
+        &copy; <span id="year"></span> GameVault
     </footer>
 
     <script>
