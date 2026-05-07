@@ -53,7 +53,13 @@
             border: none;
             cursor: pointer;
         }
+        .home-btn:hover {
+            background: #1d4ed8;
+        }
 
+        .logout-btn:hover {
+            background: #dc2626;
+        }
         .home-btn {
             background: #2563eb;
             color: white;
@@ -190,14 +196,21 @@
 </head>
 <body>
 <header>
-    <div>
-        <h1>Players</h1>
-        <p>Browse other players and view their game account profiles.</p>
+    <div style="display: flex; align-items: center; gap: 16px;">
+        <img
+            src="{{ url_for('static', filename=current_user.avatar_path) if current_user.avatar_path else 'https://ui-avatars.com/api/?name=' + (current_user.username | urlencode) + '&size=60&background=667eea&color=fff' }}"
+            alt="{{ current_user.username }}"
+            style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid white;"
+        />
+        <div>
+            <h1>Players</h1>
+            <p>Browse other players and view their game account profiles.</p>
+        </div>
     </div>
 
     <div class="header-actions">
-        <a href="{{ url_for('mainmenu') }}" class="header-btn home-btn">Home</a>
         <a href="{{ url_for('dashboard') }}" class="header-btn home-btn">Dashboard</a>
+        <a href="{{ url_for('profile') }}" class="header-btn home-btn">Profile</a>
         <a href="{{ url_for('logout') }}" class="header-btn logout-btn">Logout</a>
     </div>
 </header>

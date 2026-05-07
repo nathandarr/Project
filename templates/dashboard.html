@@ -55,6 +55,14 @@
             cursor: pointer;
         }
 
+        .home-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .logout-btn:hover {
+            background: #dc2626;
+        }
+
         .home-btn {
             background: #2563eb;
             color: white;
@@ -519,15 +527,14 @@
             style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid white;"
         />
         <div>
-            <h1>Game Account Manager</h1>
+            <h1>Dashboard</h1>
             <p>Welcome, {{ user.username }} — manage your own games, levels, ranks, and notes.</p>
         </div>
     </div>
 
     <div class="header-actions">
-        <a href="{{ url_for('home') }}" class="header-btn home-btn">Home</a>
-        <a href="{{ url_for('profile') }}" class="header-btn home-btn">Profile</a>
         <a href="{{ url_for('players') }}" class="header-btn home-btn">Players</a>
+        <a href="{{ url_for('profile') }}" class="header-btn home-btn">Profile</a>
         <a href="{{ url_for('logout') }}" class="header-btn logout-btn">Logout</a>
     </div>
 </header>
