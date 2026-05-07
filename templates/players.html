@@ -186,6 +186,26 @@
             text-align: center;
             color: #666;
         }
+    
+        .search-bar {
+            margin-bottom: 24px;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .search-bar input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+    
     </style>
 </head>
 <body>
@@ -214,7 +234,15 @@
     {% endwith %}
 
     {% if players %}
-        <div class="grid">
+        <div class="search-bar">
+            <input
+                type="text"
+                id="playerSearch"
+                placeholder="Search players by username..."
+                onkeyup="filterPlayers()"
+            />
+        </div>
+    <div class="grid" id="playerGrid">
             {% for item in players %}
                 <section class="card">
                     <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 10px;">
@@ -268,6 +296,36 @@
             No other players found yet.
         </div>
     {% endif %}
+
+    <script>
+        function filterPlayers() {
+            const query = document.getElementById('playerSearch').value.toLowerCase();
+            const cards = document.querySelectorAll('#playerGrid .card');
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                const username = card.querySelector('h2').textContent.toLowerCase();
+                if (username.includes(query)) {
+                    card.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            const emptyMsg = document.getElementById('noResults');
+            if (visibleCount === 0) {
+                emptyMsg.style.display = 'block';
+            } else {
+                emptyMsg.style.display = 'none';
+            }
+        }
+    </script>
+
+    <div id="noResults" style="display: none;" class="empty-state">
+        No players found matching your search.
+    </div>
+
 </div>
 </body>
 </html>
