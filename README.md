@@ -16,10 +16,14 @@
 
 ## Running tests
 
-\\\bash pip install pytest python -m pytest tests/ -v \\\
+
+```bash
+pip install pytest
+python -m pytest tests/ -v
+```
 
 
-The tests are intentionally minimal so they're easy to extend — add new files like `test_accounts.py`, `test_comments.py` and reuse the `client` / `make_user` fixtures
+
 
 1 — View account list
 
