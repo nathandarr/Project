@@ -24,13 +24,12 @@ view other players profiles, leave tips on their walls, and DM them privately.
 ## 5. How to Launch
 Numbered steps, copy-pastable commands:
 1. Clone the repo
-2. `pip install flask flask-sqlalchemy`
-3. `python app.py`
+2. ```bash pip install flask flask-sqlalchemy ```
+3.  ```bash python app.py ```
 
 
 ## 6. How to Run Tests
 ```bash
-powershell
 pip install pytest
 python -m pytest tests/ -v
 ```
