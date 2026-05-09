@@ -1,9 +1,39 @@
 # CITS3403 Group Project
 
-## Project Overview and Features
+## 1. Overview
+This is web app for gamers to track all their game accounts in one place,
+view other players profiles, leave tips on their walls, and DM them privately.
 
-## Project Structure
+## 2. Features
+- Add / edit / delete game accounts and details 
+- Browse other players and view their public profiles
+- Leave comments on other players profiles
+- Direct message other players
+- Stats dashboard 
 
+
+## 3. Project tech stack
+| Layer    | Tech |
+| -------- | ---- |
+| Backend  | Flask, Flask-SQLAlchemy, Werkzeug |
+| Database | SQLite |
+| Frontend | HTML, CSS, vanilla JS, fetch/AJAX |
+| Fonts    | Google Fonts (Inter, JetBrains Mono) |
+| Tests    | pytest |
+
+## 5. How to Launch
+Numbered steps, copy-pastable commands:
+1. Clone the repo
+2. `pip install flask flask-sqlalchemy`
+3. `python app.py`
+
+
+## 6. How to Run Tests
+```bash
+powershell
+pip install pytest
+python -m pytest tests/ -v
+```
 
 ## Team Members
 
@@ -12,27 +42,3 @@
 | 24145884   | Utkrista Sen     | @UtkristaUwa       |
 | 24356507   | Nathan Darr      | @nathandarr        |
 
-
-
-## Running tests
-
-
-```bash
-pip install pytest
-python -m pytest tests/ -v
-```
-
-
-
-
-1 — View account list
-
-I want to view all my game accounts in a table so that I can see all my account information in one place.
-
-2 — Add & Edit a new account
-
-As a gamer, I want to add and edit a new game account so that I can save new account details on the website.
-
-3 — account details
-
-I'd like to use this page to review my account activity over the past month.
