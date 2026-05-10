@@ -71,6 +71,7 @@ def update_account(account_id: int):
     account.rank = payload["rank"]
     account.status = payload["status"]
     account.notes = payload["notes"]
+    account.tags = payload["tags"]
 
     db.session.commit()
 

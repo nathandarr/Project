@@ -15,6 +15,7 @@ from flask import flash, redirect, render_template, request, session, url_for
 from sqlalchemy import func, or_
 
 from app import (
+    ALLOWED_TAGS,
     app,
     build_user_summary,
     db,
@@ -58,6 +59,9 @@ def login():
         ).first()
 
         if user and user.check_password(password):
+            if user.is_banned:
+                flash("This account has been banned. Contact an administrator.", "danger")
+                return render_template("login.html")
             session.clear()
             session["user_id"] = user.id
             flash("Login successful!", "success")
@@ -145,6 +149,7 @@ def dashboard():
         total_games=total_games,
         highest_level=highest_level,
         editing_account=editing_account,
+        allowed_tags=ALLOWED_TAGS,
     )
 
 

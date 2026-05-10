@@ -27,6 +27,7 @@ class User(db.Model):
     email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     is_admin: Mapped[bool] = mapped_column(default=False)
+    is_banned: Mapped[bool] = mapped_column(default=False)
     avatar_path: Mapped[str | None] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(
@@ -67,9 +68,16 @@ class GameAccount(db.Model):
     rank: Mapped[str] = mapped_column(String(50), nullable=False, default="Unranked")
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="Active")
     notes: Mapped[str] = mapped_column(String(500), nullable=False, default="")
+    tags: Mapped[str] = mapped_column(String(200), nullable=False, default="")
 
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     user: Mapped["User"] = relationship("User", back_populates="game_accounts")
+
+    @property
+    def tag_list(self) -> list[str]:
+        if not self.tags:
+            return []
+        return [t.strip() for t in self.tags.split(",") if t.strip()]
 
 
 class ProfileComment(db.Model):

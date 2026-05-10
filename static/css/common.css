@@ -138,6 +138,19 @@ header p {
     transform: translateY(-1px);
 }
 
+.admin-btn {
+    background: rgba(168, 85, 247, 0.18);
+    color: #d8b4fe;
+    border-color: rgba(168, 85, 247, 0.35);
+}
+
+.admin-btn:hover {
+    background: #a855f7;
+    color: white;
+    border-color: #a855f7;
+    transform: translateY(-1px);
+}
+
 .logout-btn {
     background: rgba(239, 68, 68, 0.15);
     color: #fca5a5;
@@ -205,4 +218,86 @@ header p {
         animation-duration: 0.01ms !important;
         transition-duration: 0.01ms !important;
     }
+}
+
+/* ===== Role / playstyle tags ===== */
+.tag-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    border: 1px solid;
+    white-space: nowrap;
+    line-height: 1.4;
+    letter-spacing: 0.02em;
+}
+
+.tag-pill-casual     { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+.tag-pill-lfg        { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+.tag-pill-new-player { background: #fefce8; color: #854d0e; border-color: #fde68a; }
+.tag-pill-veteran    { background: #f5f3ff; color: #5b21b6; border-color: #ddd6fe; }
+.tag-pill-coach      { background: #fff7ed; color: #c2410c; border-color: #fed7aa; }
+.tag-pill-streamer   { background: #fdf2f8; color: #be185d; border-color: #fbcfe8; }
+.tag-pill-solo       { background: #ecfeff; color: #0e7490; border-color: #a5f3fc; }
+.tag-pill-tryhard    { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
+
+/* ===== Tag picker (form checkboxes) ===== */
+.tag-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tag-check {
+    cursor: pointer;
+    user-select: none;
+}
+
+.tag-check input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.tag-check .tag-pill {
+    opacity: 0.55;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    cursor: pointer;
+}
+
+.tag-check:hover .tag-pill { opacity: 0.8; }
+
+.tag-check input:checked + .tag-pill {
+    opacity: 1;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.15);
+}
+
+.tag-check input:focus-visible + .tag-pill {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* Tag chips wrapper inside table cells */
+.cell-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    max-width: 220px;
+}
+
+.cell-empty {
+    color: var(--text-subtle);
+}
+
+/* Stack on featured account cards (players page) */
+.featured-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
 }

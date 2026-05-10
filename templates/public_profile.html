@@ -148,6 +148,7 @@
                             <th>Level</th>
                             <th>Rank</th>
                             <th>Status</th>
+                            <th>Tags</th>
                             <th>Notes</th>
                         </tr>
                     </thead>
@@ -163,6 +164,15 @@
                                     <span class="badge {{ 'badge-active' if account.status == 'Active' else 'badge-inactive' }}">
                                         {{ account.status }}
                                     </span>
+                                </td>
+                                <td data-label="Tags">
+                                    <div class="cell-tags">
+                                        {% for tag in account.tag_list %}
+                                            <span class="tag-pill tag-pill-{{ tag | replace(' ', '-') | lower }}">{{ tag }}</span>
+                                        {% else %}
+                                            <span class="cell-empty">—</span>
+                                        {% endfor %}
+                                    </div>
                                 </td>
                                 <td data-label="Notes" class="cell-notes" title="{{ account.notes or '' }}">{{ account.notes or "—" }}</td>
                             </tr>

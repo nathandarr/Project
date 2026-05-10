@@ -38,6 +38,7 @@ db = SQLAlchemy(app)
 
 ALLOWED_REGIONS = {"OCE", "Asia", "EU", "NA"}
 ALLOWED_STATUSES = {"Active", "Inactive"}
+ALLOWED_TAGS = ["Casual", "LFG", "New Player", "Veteran", "Coach", "Streamer", "Solo", "Tryhard"]
 
 
 # Models live in models.py — imported as a side effect so SQLAlchemy
@@ -71,6 +72,8 @@ def add_missing_user_profile_columns() -> None:
         statements.append("ALTER TABLE users ADD COLUMN updated_at DATETIME")
     if "avatar_path" not in existing_columns:
         statements.append("ALTER TABLE users ADD COLUMN avatar_path VARCHAR(255)")
+    if "is_banned" not in existing_columns:
+        statements.append("ALTER TABLE users ADD COLUMN is_banned BOOLEAN NOT NULL DEFAULT 0")
     
     if not statements:
         return
@@ -90,16 +93,35 @@ def add_missing_user_profile_columns() -> None:
         )
 
 
+def add_missing_game_account_columns() -> None:
+    inspector = inspect(db.engine)
+    if "game_accounts" not in set(inspector.get_table_names()):
+        return
+
+    columns = {c["name"] for c in inspector.get_columns("game_accounts")}
+    if "tags" in columns:
+        return
+
+    with db.engine.begin() as connection:
+        connection.execute(text("ALTER TABLE game_accounts ADD COLUMN tags VARCHAR(200) NOT NULL DEFAULT ''"))
+
+
 with app.app_context():
     db.create_all()
     add_missing_user_profile_columns()
+    add_missing_game_account_columns()
 
 
 def get_current_user() -> User | None:
     user_id = session.get("user_id")
     if not user_id:
         return None
-    return db.session.get(User, user_id)
+    user = db.session.get(User, user_id)
+    # Banned users are treated as logged-out — get_current_user returns None,
+    # @login_required clears their session, and they're sent to /login.
+    if user is not None and user.is_banned:
+        return None
+    return user
 
 
 def is_api_request() -> bool:
@@ -119,6 +141,27 @@ def login_required(view_func):
             flash("Please log in to access that page.", "warning")
             return redirect(url_for("login"))
 
+        return view_func(*args, **kwargs)
+
+    return wrapped_view
+
+
+def admin_required(view_func):
+    """Like login_required, but also requires user.is_admin."""
+    @wraps(view_func)
+    def wrapped_view(*args, **kwargs):
+        user = get_current_user()
+        if user is None:
+            session.clear()
+            if is_api_request():
+                return jsonify({"error": "Authentication required."}), 401
+            flash("Please log in to access that page.", "warning")
+            return redirect(url_for("login"))
+        if not user.is_admin:
+            if is_api_request():
+                return jsonify({"error": "Admin access required."}), 403
+            flash("Admin access required.", "danger")
+            return redirect(url_for("dashboard"))
         return view_func(*args, **kwargs)
 
     return wrapped_view
@@ -290,6 +333,7 @@ def serialize_account(account: GameAccount) -> dict[str, Any]:
         "rank": account.rank,
         "status": account.status,
         "notes": account.notes,
+        "tags": account.tag_list,
         "user_id": account.user_id,
     }
 
@@ -319,6 +363,21 @@ def validate_account_payload(source: dict[str, Any]) -> tuple[dict[str, Any], li
     rank = str(source.get("rank", "")).strip()
     status = str(source.get("status", "")).strip()
     notes = str(source.get("notes", "")).strip()
+
+    # Tags: HTML form sends multiple values when checkboxes share a name.
+    # request.form (a MultiDict) provides .getlist; JSON payloads pass a list.
+    if hasattr(source, "getlist"):
+        raw_tags = source.getlist("tags")
+    else:
+        raw = source.get("tags", [])
+        raw_tags = raw if isinstance(raw, list) else [raw]
+
+    seen: list[str] = []
+    for tag in raw_tags:
+        clean = str(tag).strip()
+        if clean and clean in ALLOWED_TAGS and clean not in seen:
+            seen.append(clean)
+    tags = ",".join(seen)
 
     errors: list[str] = []
 
@@ -352,6 +411,7 @@ def validate_account_payload(source: dict[str, Any]) -> tuple[dict[str, Any], li
         "rank": rank,
         "status": status,
         "notes": notes,
+        "tags": tags,
     }
 
     return payload, errors
@@ -362,6 +422,7 @@ import pages    # noqa: E402, F401
 import actions  # noqa: E402, F401
 import chat     # noqa: E402, F401
 import api      # noqa: E402, F401
+import admin    # noqa: E402, F401
 
 
 if __name__ == "__main__":

@@ -121,6 +121,14 @@
                                     <span class="badge {{ 'badge-active' if item.featured_account.status == 'Active' else 'badge-inactive' }}">{{ item.featured_account.status }}</span>
                                 </div>
                             </div>
+
+                            {% if item.featured_account.tag_list %}
+                                <div class="featured-tags">
+                                    {% for tag in item.featured_account.tag_list %}
+                                        <span class="tag-pill tag-pill-{{ tag | replace(' ', '-') | lower }}">{{ tag }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
                         </div>
                     {% else %}
                         <div class="featured">
