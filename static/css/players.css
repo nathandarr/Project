@@ -349,9 +349,10 @@
     border-radius: 10px;
     font-size: 15px;
     outline: none;
-    background: rgba(255, 255, 255, 0.08);
-    color: white;
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: rgb(189, 189, 189) !important;
     transition: border-color 0.3s, box-shadow 0.3s;
+    -webkit-text-fill-color: rgb(189, 189, 189) !important;
 }
 
 .search-bar input::placeholder {
