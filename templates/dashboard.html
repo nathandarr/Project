@@ -5,88 +5,206 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Dashboard - Game Account Manager</title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+
     <style>
-        * {
-            box-sizing: border-box;
+        :root {
+            --bg: #f6f8fc;
+            --bg-grad-1: #eef2ff;
+            --bg-grad-2: #f6f8fc;
+            --surface: #ffffff;
+            --surface-muted: #f9fafb;
+            --border: #e5e7eb;
+            --border-strong: #d1d5db;
+            --text: #0f172a;
+            --text-muted: #475569;
+            --text-subtle: #64748b;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-soft: #eef2ff;
+            --success: #16a34a;
+            --success-soft: #dcfce7;
+            --danger: #dc2626;
+            --danger-soft: #fee2e2;
+            --warning: #d97706;
+            --warning-soft: #fef3c7;
+            --info: #2563eb;
+            --info-soft: #dbeafe;
+            --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
+            --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06), 0 2px 4px rgba(15, 23, 42, 0.04);
+            --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.08), 0 4px 8px rgba(15, 23, 42, 0.04);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
         }
+
+        * { box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
 
         body {
             margin: 0;
-            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            background: #f4f6fb;
-            color: #222;
+            font-family: "Inter", "Segoe UI", Tahoma, sans-serif;
+            background:
+                radial-gradient(1200px 600px at 10% -10%, #e0e7ff 0%, transparent 60%),
+                radial-gradient(1000px 500px at 100% 0%, #ddd6fe 0%, transparent 55%),
+                var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
         }
 
+        /* ===== Header ===== */
         header {
-            background: #1f2937;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             color: white;
-            padding: 20px 32px;
+            padding: 18px 32px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             gap: 16px;
             flex-wrap: wrap;
+            box-shadow: var(--shadow-md);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            min-width: 0;
+        }
+
+        .header-user img {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
         }
 
         header h1 {
             margin: 0;
-            font-size: 28px;
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
         }
 
         header p {
-            margin: 4px 0 0;
-            font-size: 14px;
-            color: #d1d5db;
+            margin: 2px 0 0;
+            font-size: 13px;
+            color: #cbd5e1;
         }
 
         .header-actions {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
         }
 
         .header-btn {
-            display: inline-block;
-            padding: 10px 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 14px;
             border-radius: 10px;
             text-decoration: none;
             font-weight: 600;
-            border: none;
+            font-size: 14px;
+            border: 1px solid transparent;
             cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
         }
 
-        .home-btn:hover {
-            background: #1d4ed8;
+        .header-btn svg {
+            width: 16px;
+            height: 16px;
         }
 
-        .logout-btn:hover {
-            background: #dc2626;
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.08);
+            color: #e2e8f0;
+            border-color: rgba(255, 255, 255, 0.12);
         }
 
-        .home-btn {
-            background: #2563eb;
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.16);
             color: white;
+            transform: translateY(-1px);
         }
 
         .logout-btn {
-            background: #ef4444;
-            color: white;
+            background: rgba(239, 68, 68, 0.15);
+            color: #fca5a5;
+            border-color: rgba(239, 68, 68, 0.3);
         }
 
+        .logout-btn:hover {
+            background: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+
+        /* ===== Container ===== */
         .container {
             max-width: 1200px;
-            margin: 30px auto;
+            margin: 32px auto;
             padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
         }
 
+        /* ===== Cards ===== */
         .card {
-            background: white;
-            border-radius: 14px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
             padding: 24px;
-            margin-bottom: 24px;
         }
 
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.01em;
+        }
+
+        .card-title svg {
+            width: 20px;
+            height: 20px;
+            color: var(--primary);
+        }
+
+        .card-subtitle {
+            font-size: 13px;
+            color: var(--text-subtle);
+            margin: 4px 0 0;
+        }
+
+        /* ===== Flash Messages ===== */
         .flash-messages {
             display: flex;
             flex-direction: column;
@@ -94,68 +212,113 @@
         }
 
         .flash-message {
-            padding: 12px 14px;
-            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
             font-weight: 500;
+            font-size: 14px;
+            border: 1px solid;
+            animation: slideIn 0.3s ease;
         }
 
-        .flash-success {
-            background: #e8f8ee;
-            color: #1f7a3f;
-            border: 1px solid #b7e4c7;
+        .flash-message svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
         }
 
-        .flash-danger {
-            background: #fff1f1;
-            color: #b02a37;
-            border: 1px solid #f0b6b6;
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .flash-warning {
-            background: #fff8e6;
-            color: #9a6700;
-            border: 1px solid #f7d58b;
-        }
+        .flash-success { background: var(--success-soft); color: #166534; border-color: #bbf7d0; }
+        .flash-danger  { background: var(--danger-soft);  color: #991b1b; border-color: #fecaca; }
+        .flash-warning { background: var(--warning-soft); color: #92400e; border-color: #fde68a; }
+        .flash-info    { background: var(--info-soft);    color: #1e40af; border-color: #bfdbfe; }
 
-        .flash-info {
-            background: #eef4ff;
-            color: #1d4ed8;
-            border: 1px solid #c7d8ff;
-        }
-
+        /* ===== Stats Grid ===== */
         .stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 16px;
         }
 
         .stat-box {
-            background: #eff6ff;
+            position: relative;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            transition: all 0.25s ease;
+            overflow: hidden;
+        }
+
+        .stat-box::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent 0%, rgba(79, 70, 229, 0.04) 100%);
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-box:hover::before { opacity: 1; }
+
+        .stat-icon {
+            width: 44px;
+            height: 44px;
             border-radius: 12px;
-            padding: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 1;
         }
 
-        .stat-box h3 {
-            margin: 0 0 6px;
-            font-size: 15px;
-            color: #374151;
+        .stat-icon svg {
+            width: 22px;
+            height: 22px;
         }
 
-        .stat-box p {
+        .stat-icon.indigo { background: #eef2ff; color: #4f46e5; }
+        .stat-icon.violet { background: #f3e8ff; color: #7c3aed; }
+        .stat-icon.amber  { background: #fef3c7; color: #d97706; }
+
+        .stat-content { position: relative; z-index: 1; min-width: 0; }
+
+        .stat-content h3 {
+            margin: 0 0 4px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-subtle);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .stat-content p {
             margin: 0;
-            font-size: 28px;
-            font-weight: bold;
-            color: #1d4ed8;
+            font-size: 30px;
+            font-weight: 800;
+            color: var(--text);
+            font-family: "JetBrains Mono", monospace;
+            letter-spacing: -0.02em;
+            line-height: 1;
         }
 
-        h2 {
-            margin-top: 0;
-        }
-
-        form {
-            margin: 0;
-        }
-
+        /* ===== Form ===== */
         .form-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -165,406 +328,394 @@
         .form-group {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
         }
 
-        .notes-group {
-            margin-top: 16px;
+        .form-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
         }
 
-        input,
-        select,
-        textarea {
+        .notes-group { margin-top: 16px; }
+
+        input, select, textarea {
             width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #d1d5db;
+            padding: 10px 14px;
+            border: 1px solid var(--border-strong);
             border-radius: 10px;
             font-size: 14px;
+            font-family: inherit;
+            color: var(--text);
+            background: var(--surface);
+            transition: all 0.18s ease;
         }
 
-        input:focus,
-        select:focus,
-        textarea:focus {
-            outline: none;
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        input::placeholder, textarea::placeholder { color: #94a3b8; }
+
+        input:hover, select:hover, textarea:hover {
+            border-color: #94a3b8;
         }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+        }
+
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 38px;
+        }
+
+        textarea { resize: vertical; min-height: 90px; }
 
         .form-actions {
-            margin-top: 18px;
+            margin-top: 20px;
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
         }
 
-        button,
-        .link-btn {
-            border: none;
+        button, .link-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid transparent;
             border-radius: 10px;
-            padding: 10px 16px;
+            padding: 10px 18px;
             font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
             cursor: pointer;
-            transition: 0.2s ease;
+            transition: all 0.18s ease;
             text-decoration: none;
-            display: inline-block;
+            white-space: nowrap;
+        }
+
+        button svg, .link-btn svg {
+            width: 16px;
+            height: 16px;
         }
 
         .primary-btn {
-            background: #2563eb;
+            background: var(--primary);
             color: white;
+            box-shadow: 0 1px 2px rgba(79, 70, 229, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.15);
         }
 
         .primary-btn:hover {
-            background: #1d4ed8;
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
         }
 
         .secondary-btn {
-            background: #e5e7eb;
-            color: #111827;
+            background: var(--surface);
+            color: var(--text);
+            border-color: var(--border-strong);
         }
 
         .secondary-btn:hover {
-            background: #d1d5db;
+            background: var(--surface-muted);
+            border-color: var(--text-subtle);
         }
 
         .danger-btn {
-            background: #ef4444;
-            color: white;
+            background: white;
+            color: var(--danger);
+            border-color: #fecaca;
         }
 
         .danger-btn:hover {
-            background: #dc2626;
+            background: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+
+        /* ===== Table ===== */
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 16px;
+            font-size: 14px;
         }
 
         thead {
-            background: #1f2937;
-            color: white;
+            background: var(--surface-muted);
         }
 
-        th,
-        td {
+        thead th {
             text-align: left;
-            padding: 14px 12px;
-            border-bottom: 1px solid #e5e7eb;
-            vertical-align: top;
+            padding: 12px 16px;
+            font-weight: 600;
+            font-size: 12px;
+            color: var(--text-subtle);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        tbody td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+            vertical-align: middle;
+        }
+
+        tbody tr:last-child td { border-bottom: none; }
+
+        tbody tr {
+            transition: background 0.15s ease;
         }
 
         tbody tr:hover {
-            background: #f9fafb;
+            background: #fafbff;
+        }
+
+        .cell-game {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .cell-mono {
+            font-family: "JetBrains Mono", monospace;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .cell-notes {
+            max-width: 220px;
+            color: var(--text-subtle);
+            font-size: 13px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .actions {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             flex-wrap: wrap;
         }
 
-        .inline-form {
-            display: inline;
+        .actions .link-btn,
+        .actions button {
+            padding: 7px 12px;
+            font-size: 13px;
         }
 
-        .tag {
-            display: inline-block;
-            background: #dbeafe;
-            color: #1d4ed8;
+        .inline-form { display: inline; margin: 0; }
+
+        /* ===== Badges ===== */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
             padding: 4px 10px;
             border-radius: 999px;
             font-size: 12px;
-            font-weight: bold;
+            font-weight: 600;
+            border: 1px solid;
+            white-space: nowrap;
         }
 
+        .badge::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .badge-active {
+            background: var(--success-soft);
+            color: var(--success);
+            border-color: #bbf7d0;
+        }
+
+        .badge-inactive {
+            background: #f1f5f9;
+            color: var(--text-subtle);
+            border-color: #e2e8f0;
+        }
+
+        .region-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            background: var(--info-soft);
+            color: var(--info);
+            font-family: "JetBrains Mono", monospace;
+        }
+
+        /* ===== Empty State ===== */
         .empty-state {
             text-align: center;
-            color: #666;
-            padding: 24px 8px;
+            padding: 48px 24px;
+            color: var(--text-subtle);
         }
 
-        #chat-button {
-            position: fixed;
-            right: 24px;
-            bottom: 24px;
-            background: #2563eb;
-            color: white;
-            padding: 13px 18px;
-            border-radius: 999px;
-            cursor: pointer;
-            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.25);
-            z-index: 9998;
-            font-weight: 700;
-            user-select: none;
+        .empty-state svg {
+            width: 56px;
+            height: 56px;
+            color: #cbd5e1;
+            margin-bottom: 16px;
         }
 
-        #chat-button:hover {
-            background: #1d4ed8;
-            transform: translateY(-1px);
+        .empty-state h3 {
+            margin: 0 0 6px;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-muted);
         }
 
-        #chat-box {
-            position: fixed;
-            right: 24px;
-            bottom: 24px;
-            left: auto;
-            width: 420px;
-            height: 540px;
-            background: white;
-            border-radius: 18px;
-            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.22);
-            border: 1px solid #e5e7eb;
-            display: none;
-            flex-direction: column;
-            overflow: hidden;
-            z-index: 9999;
-        }
-
-        #chat-header {
-            background: #1f2937;
-            color: white;
-            padding: 14px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: 700;
-        }
-
-        #chat-close {
-            background: rgba(255, 255, 255, 0.12);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 6px 10px;
-            cursor: pointer;
-            font-weight: 700;
-        }
-
-        #chat-close:hover {
-            background: rgba(255, 255, 255, 0.22);
-        }
-
-        #chat-body {
-            display: flex;
-            flex: 1;
-            min-height: 0;
-        }
-
-        #chat-users {
-            width: 36%;
-            background: #f9fafb;
-            border-right: 1px solid #e5e7eb;
-            overflow-y: auto;
-        }
-
-        .chat-user {
-            padding: 13px 12px;
-            cursor: pointer;
-            border-bottom: 1px solid #e5e7eb;
-            font-size: 14px;
-            color: #374151;
-        }
-
-        .chat-user:hover {
-            background: #eef2ff;
-        }
-
-        .chat-user.active {
-            background: #dbeafe;
-            color: #1d4ed8;
-            font-weight: 700;
-        }
-
-        #chat-panel {
-            width: 64%;
-            display: flex;
-            flex-direction: column;
-            min-width: 0;
-        }
-
-        #chat-selected-user {
-            padding: 12px;
-            border-bottom: 1px solid #e5e7eb;
-            font-weight: 700;
-            color: #111827;
-            background: white;
-        }
-
-        #chat-messages {
-            flex: 1;
-            padding: 12px;
-            overflow-y: auto;
-            background: #f8fafc;
-            min-height: 0;
-        }
-
-        .chat-message {
-            margin-bottom: 10px;
-            padding: 9px 10px;
-            border-radius: 10px;
-            background: white;
-            border: 1px solid #e5e7eb;
-            color: #374151;
-            font-size: 13px;
-            line-height: 1.4;
-            word-wrap: break-word;
-        }
-
-        #chat-input-area {
-            display: flex;
-            gap: 8px;
-            padding: 12px;
-            border-top: 1px solid #e5e7eb;
-            background: white;
-        }
-
-        #chat-input {
-            flex: 1;
-            min-width: 0;
-            padding: 10px;
-            border-radius: 10px;
-            border: 1px solid #cbd5e1;
+        .empty-state p {
+            margin: 0;
             font-size: 14px;
         }
 
-        #chat-input:focus {
-            outline: none;
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-        }
-
-        #chat-send {
-            background: #2563eb;
-            color: white;
-            border: none;
-            padding: 10px 13px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 700;
-        }
-
-        #chat-send:hover {
-            background: #1d4ed8;
+        /* ===== Responsive ===== */
+        @media (max-width: 768px) {
+            header { padding: 14px 18px; }
+            header h1 { font-size: 18px; }
+            header p { font-size: 12px; }
+            .header-user img { width: 44px; height: 44px; }
+            .container { padding: 0 14px; margin: 20px auto; gap: 18px; }
+            .card { padding: 18px; }
+            .stat-content p { font-size: 24px; }
         }
 
         @media (max-width: 900px) {
-            table,
-            thead,
-            tbody,
-            th,
-            td,
-            tr {
-                display: block;
-            }
-
-            thead {
-                display: none;
-            }
-
+            .table-wrap { border: none; }
+            table, thead, tbody, th, td, tr { display: block; }
+            thead { display: none; }
             tbody tr {
-                margin-bottom: 16px;
-                border: 1px solid #e5e7eb;
-                border-radius: 12px;
-                overflow: hidden;
-                background: white;
+                margin-bottom: 14px;
+                border: 1px solid var(--border);
+                border-radius: var(--radius-md);
+                background: var(--surface);
+                padding: 6px 0;
             }
-
-            td {
+            tbody tr:hover { background: var(--surface); }
+            tbody td {
                 display: flex;
                 justify-content: space-between;
+                align-items: center;
                 gap: 16px;
-                padding: 12px;
+                padding: 10px 16px;
+                border-bottom: 1px solid var(--border);
             }
-
+            tbody td:last-child { border-bottom: none; }
             td::before {
                 content: attr(data-label);
-                font-weight: bold;
-                color: #374151;
-                min-width: 110px;
+                font-weight: 600;
+                color: var(--text-subtle);
+                font-size: 12px;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
             }
-
-            #chat-box {
-                right: 12px;
-                bottom: 12px;
-                width: calc(100vw - 24px);
-                height: 520px;
-            }
-
-            #chat-button {
-                right: 12px;
-                bottom: 12px;
-            }
+            .cell-notes { max-width: none; white-space: normal; text-align: right; }
         }
 
-        @media (max-width: 520px) {
-            #chat-body {
-                flex-direction: column;
-            }
-
-            #chat-users {
-                width: 100%;
-                max-height: 120px;
-                border-right: none;
-                border-bottom: 1px solid #e5e7eb;
-            }
-
-            #chat-panel {
-                width: 100%;
-                flex: 1;
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
             }
         }
     </style>
 </head>
 
 <body>
+{% include "_vault_chamber_bg.html" %}
 <header>
-    <div style="display: flex; align-items: center; gap: 16px;">
+    <div class="header-user">
         <img
-            src="{{ url_for('static', filename=user.avatar_path) if user.avatar_path else 'https://ui-avatars.com/api/?name=' + (user.username | urlencode) + '&size=60&background=667eea&color=fff' }}"
+            src="{{ url_for('static', filename=user.avatar_path) if user.avatar_path else 'https://ui-avatars.com/api/?name=' + (user.username | urlencode) + '&size=120&background=4f46e5&color=fff&bold=true' }}"
             alt="{{ user.username }}"
-            style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid white;"
         />
         <div>
             <h1>Dashboard</h1>
-            <p>Welcome, {{ user.username }} — manage your own games, levels, ranks, and notes.</p>
+            <p>Welcome back, <strong>{{ user.username }}</strong> — manage your games, levels, and ranks.</p>
         </div>
     </div>
 
     <div class="header-actions">
-        <a href="{{ url_for('players') }}" class="header-btn home-btn">Players</a>
-        <a href="{{ url_for('profile') }}" class="header-btn home-btn">Profile</a>
-        <a href="{{ url_for('logout') }}" class="header-btn logout-btn">Logout</a>
+        <a href="{{ url_for('players') }}" class="header-btn nav-btn" aria-label="Players">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Players
+        </a>
+        <a href="{{ url_for('profile') }}" class="header-btn nav-btn" aria-label="Profile">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Profile
+        </a>
+        <a href="{{ url_for('logout') }}" class="header-btn logout-btn" aria-label="Logout">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Logout
+        </a>
     </div>
 </header>
 
 <div class="container">
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            <section class="card">
-                <div class="flash-messages">
-                    {% for category, message in messages %}
-                        <div class="flash-message flash-{{ category }}">{{ message }}</div>
-                    {% endfor %}
-                </div>
-            </section>
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}" role="alert">
+                        {% if category == 'success' %}
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        {% elif category == 'danger' %}
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                        {% elif category == 'warning' %}
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        {% else %}
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        {% endif %}
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            </div>
         {% endif %}
     {% endwith %}
 
-    <section class="card">
-        <div class="stats">
-            <div class="stat-box">
+    <section class="stats">
+        <div class="stat-box">
+            <div class="stat-icon indigo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M7 12h4"/><path d="M9 10v4"/><circle cx="16" cy="11" r="1"/><circle cx="18" cy="13" r="1"/></svg>
+            </div>
+            <div class="stat-content">
                 <h3>Total Accounts</h3>
                 <p>{{ total_accounts }}</p>
             </div>
+        </div>
 
-            <div class="stat-box">
+        <div class="stat-box">
+            <div class="stat-icon violet">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <div class="stat-content">
                 <h3>Total Games</h3>
                 <p>{{ total_games }}</p>
             </div>
+        </div>
 
-            <div class="stat-box">
+        <div class="stat-box">
+            <div class="stat-icon amber">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+            </div>
+            <div class="stat-content">
                 <h3>Highest Level</h3>
                 <p>{{ highest_level }}</p>
             </div>
@@ -572,32 +723,35 @@
     </section>
 
     <section class="card">
-        <h2>{{ "Edit Game Account" if editing_account else "Add New Game Account" }}</h2>
+        <div class="card-header">
+            <div>
+                <h2 class="card-title">
+                    {% if editing_account %}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    Edit Game Account
+                    {% else %}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                    Add New Game Account
+                    {% endif %}
+                </h2>
+                <p class="card-subtitle">
+                    {{ "Update the details for this account." if editing_account else "Track a new game account with level, rank, and notes." }}
+                </p>
+            </div>
+        </div>
 
         <form method="POST" action="{% if editing_account %}{{ url_for('update_account', account_id=editing_account.id) }}{% else %}{{ url_for('add_account') }}{% endif %}">
             <div class="form-grid">
                 <div class="form-group">
                     <label for="game_name">Game Name</label>
-                    <input
-                        id="game_name"
-                        name="game_name"
-                        type="text"
-                        placeholder="e.g. Valorant"
-                        value="{{ editing_account.game_name if editing_account else '' }}"
-                        required
-                    />
+                    <input id="game_name" name="game_name" type="text" placeholder="e.g. Valorant"
+                        value="{{ editing_account.game_name if editing_account else '' }}" required />
                 </div>
 
                 <div class="form-group">
                     <label for="account_name">Account Name</label>
-                    <input
-                        id="account_name"
-                        name="account_name"
-                        type="text"
-                        placeholder="e.g. aceShot"
-                        value="{{ editing_account.account_name if editing_account else '' }}"
-                        required
-                    />
+                    <input id="account_name" name="account_name" type="text" placeholder="e.g. aceShot"
+                        value="{{ editing_account.account_name if editing_account else '' }}" required />
                 </div>
 
                 <div class="form-group">
@@ -613,27 +767,14 @@
 
                 <div class="form-group">
                     <label for="level">Level</label>
-                    <input
-                        id="level"
-                        name="level"
-                        type="number"
-                        min="1"
-                        placeholder="e.g. 50"
-                        value="{{ editing_account.level if editing_account else '' }}"
-                        required
-                    />
+                    <input id="level" name="level" type="number" min="1" placeholder="e.g. 50"
+                        value="{{ editing_account.level if editing_account else '' }}" required />
                 </div>
 
                 <div class="form-group">
                     <label for="rank">Rank</label>
-                    <input
-                        id="rank"
-                        name="rank"
-                        type="text"
-                        placeholder="e.g. Gold, Diamond, Immortal"
-                        value="{{ editing_account.rank if editing_account else '' }}"
-                        required
-                    />
+                    <input id="rank" name="rank" type="text" placeholder="e.g. Gold, Diamond, Immortal"
+                        value="{{ editing_account.rank if editing_account else '' }}" required />
                 </div>
 
                 <div class="form-group">
@@ -648,16 +789,12 @@
 
             <div class="form-group notes-group">
                 <label for="notes">Notes</label>
-                <textarea
-                    id="notes"
-                    name="notes"
-                    rows="4"
-                    placeholder="Add notes about this account"
-                >{{ editing_account.notes if editing_account else '' }}</textarea>
+                <textarea id="notes" name="notes" rows="4" placeholder="Add notes about this account">{{ editing_account.notes if editing_account else '' }}</textarea>
             </div>
 
             <div class="form-actions">
                 <button type="submit" class="primary-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                     {{ "Update Account" if editing_account else "Save Account" }}
                 </button>
 
@@ -669,197 +806,74 @@
     </section>
 
     <section class="card">
-        <h2>Your Game Accounts</h2>
+        <div class="card-header">
+            <div>
+                <h2 class="card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                    Your Game Accounts
+                </h2>
+                <p class="card-subtitle">{{ accounts|length }} account{{ '' if accounts|length == 1 else 's' }} on file.</p>
+            </div>
+        </div>
 
         {% if accounts %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Game</th>
-                        <th>Account Name</th>
-                        <th>Region</th>
-                        <th>Level</th>
-                        <th>Rank</th>
-                        <th>Status</th>
-                        <th>Notes</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {% for account in accounts %}
+            <div class="table-wrap">
+                <table>
+                    <thead>
                         <tr>
-                            <td data-label="Game">{{ account.game_name }}</td>
-                            <td data-label="Account Name">{{ account.account_name }}</td>
-                            <td data-label="Region">{{ account.region }}</td>
-                            <td data-label="Level">{{ account.level }}</td>
-                            <td data-label="Rank">{{ account.rank }}</td>
-                            <td data-label="Status">
-                                <span class="tag">{{ account.status }}</span>
-                            </td>
-                            <td data-label="Notes">{{ account.notes or "-" }}</td>
-                            <td data-label="Actions">
-                                <div class="actions">
-                                    <a href="{{ url_for('dashboard', edit=account.id) }}" class="link-btn secondary-btn">Edit</a>
-
-                                    <form class="inline-form" method="POST" action="{{ url_for('delete_account', account_id=account.id) }}" onsubmit="return confirm('Delete this account?');">
-                                        <button type="submit" class="danger-btn">Delete</button>
-                                    </form>
-                                </div>
-                            </td>
+                            <th>Game</th>
+                            <th>Account Name</th>
+                            <th>Region</th>
+                            <th>Level</th>
+                            <th>Rank</th>
+                            <th>Status</th>
+                            <th>Notes</th>
+                            <th>Actions</th>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {% for account in accounts %}
+                            <tr>
+                                <td data-label="Game" class="cell-game">{{ account.game_name }}</td>
+                                <td data-label="Account">{{ account.account_name }}</td>
+                                <td data-label="Region"><span class="region-tag">{{ account.region }}</span></td>
+                                <td data-label="Level" class="cell-mono">{{ account.level }}</td>
+                                <td data-label="Rank">{{ account.rank }}</td>
+                                <td data-label="Status">
+                                    <span class="badge {{ 'badge-active' if account.status == 'Active' else 'badge-inactive' }}">
+                                        {{ account.status }}
+                                    </span>
+                                </td>
+                                <td data-label="Notes" class="cell-notes" title="{{ account.notes or '' }}">{{ account.notes or "—" }}</td>
+                                <td data-label="Actions">
+                                    <div class="actions">
+                                        <a href="{{ url_for('dashboard', edit=account.id) }}" class="link-btn secondary-btn" aria-label="Edit account">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                            Edit
+                                        </a>
+                                        <form class="inline-form" method="POST" action="{{ url_for('delete_account', account_id=account.id) }}" onsubmit="return confirm('Delete this account?');">
+                                            <button type="submit" class="danger-btn" aria-label="Delete account">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+                                                Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         {% else %}
             <div class="empty-state">
-                <p>No game accounts yet. Add your first one above.</p>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M7 12h4"/><path d="M9 10v4"/><circle cx="16" cy="11" r="1"/><circle cx="18" cy="13" r="1"/></svg>
+                <h3>No game accounts yet</h3>
+                <p>Add your first one using the form above.</p>
             </div>
         {% endif %}
     </section>
 </div>
 
-<div id="chat-button">Chat</div>
-
-<div id="chat-box">
-    <div id="chat-header">
-        <span>Direct Messages</span>
-        <button id="chat-close" type="button">X</button>
-    </div>
-
-    <div id="chat-body">
-        <div id="chat-users"></div>
-
-        <div id="chat-panel">
-            <div id="chat-selected-user">Select a player</div>
-            <div id="chat-messages"></div>
-
-            <div id="chat-input-area">
-                <input type="text" id="chat-input" placeholder="Type message..." maxlength="200" />
-                <button id="chat-send" type="button">Send</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    const chatButton = document.getElementById("chat-button");
-    const chatBox = document.getElementById("chat-box");
-    const chatClose = document.getElementById("chat-close");
-    const chatUsers = document.getElementById("chat-users");
-    const chatMessages = document.getElementById("chat-messages");
-    const chatInput = document.getElementById("chat-input");
-    const chatSend = document.getElementById("chat-send");
-    const chatSelectedUser = document.getElementById("chat-selected-user");
-
-    let selectedUserId = null;
-    let selectedUsername = null;
-
-    chatButton.addEventListener("click", function () {
-        chatBox.style.display = "flex";
-        chatButton.style.display = "none";
-        loadUsers();
-    });
-
-    chatClose.addEventListener("click", function () {
-        chatBox.style.display = "none";
-        chatButton.style.display = "block";
-    });
-
-    function loadUsers() {
-        fetch("/chat/users")
-            .then(response => response.json())
-            .then(users => {
-                chatUsers.innerHTML = "";
-
-                users.forEach(user => {
-                    const div = document.createElement("div");
-                    div.className = "chat-user";
-                    div.textContent = user.username;
-
-                    div.addEventListener("click", function () {
-                        selectedUserId = user.id;
-                        selectedUsername = user.username;
-                        chatSelectedUser.textContent = "Chat with " + selectedUsername;
-
-                        document.querySelectorAll(".chat-user").forEach(item => {
-                            item.classList.remove("active");
-                        });
-
-                        div.classList.add("active");
-                        loadDM();
-                    });
-
-                    chatUsers.appendChild(div);
-                });
-            });
-    }
-
-    function loadDM() {
-        if (!selectedUserId) {
-            return;
-        }
-
-        fetch("/chat/dm/" + selectedUserId)
-            .then(response => response.json())
-            .then(messages => {
-                chatMessages.innerHTML = "";
-
-                messages.forEach(msg => {
-                    const div = document.createElement("div");
-                    div.className = "chat-message";
-                    div.textContent = "[" + msg.created_at + "] " + msg.sender + ": " + msg.content;
-                    chatMessages.appendChild(div);
-                });
-
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            });
-    }
-
-    function sendDM() {
-        const content = chatInput.value.trim();
-
-        if (!selectedUserId) {
-            alert("Select a player first");
-            return;
-        }
-
-        if (content === "") {
-            return;
-        }
-
-        fetch("/chat/dm/send", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                receiver_id: selectedUserId,
-                content: content
-            })
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    chatInput.value = "";
-                    loadDM();
-                }
-            });
-    }
-
-    chatSend.addEventListener("click", sendDM);
-
-    chatInput.addEventListener("keydown", function (event) {
-        if (event.key === "Enter") {
-            sendDM();
-        }
-    });
-
-    setInterval(function () {
-        if (chatBox.style.display === "flex" && selectedUserId) {
-            loadDM();
-        }
-    }, 3000);
-</script>
+{% include "_chat_widget.html" %}
 </body>
 </html>

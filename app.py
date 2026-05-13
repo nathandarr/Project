@@ -18,7 +18,9 @@ os.makedirs(INSTANCE_DIR, exist_ok=True)
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 app.secret_key = os.environ.get("SECRET_KEY", "change-this-secret-key")
-app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
+    "DATABASE_URL", f"sqlite:///{DB_PATH}"
+)
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads")
@@ -107,6 +109,20 @@ class ProfileComment(db.Model):
     profile_user: Mapped["User"] = relationship("User", foreign_keys=[profile_user_id])
 
 
+class Message(db.Model):
+    __tablename__ = "messages"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    content: Mapped[str] = mapped_column(String(500), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
+
+    sender_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    receiver_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+
+    sender: Mapped["User"] = relationship("User", foreign_keys=[sender_id])
+    receiver: Mapped["User"] = relationship("User", foreign_keys=[receiver_id])
+
+
 def add_missing_user_profile_columns() -> None:
     inspector = inspect(db.engine)
     existing_tables = set(inspector.get_table_names())
@@ -165,7 +181,7 @@ def get_current_user() -> User | None:
 
 
 def is_api_request() -> bool:
-    return request.path.startswith("/api/")
+    return request.path.startswith("/api/") or request.path.startswith("/chat/")
 
 
 def login_required(view_func):
@@ -862,6 +878,91 @@ def delete_profile_comment(comment_id: int):
     flash("Comment deleted successfully.", "info")
     return redirect(url_for("public_profile", user_id=profile_user_id))
 
+
+@app.route("/chat/users", methods=["GET"])
+@login_required
+def chat_users():
+    viewer = get_current_user()
+    if viewer is None:
+        return jsonify({"error": "Authentication required."}), 401
+
+    users = (
+        User.query.filter(User.id != viewer.id)
+        .order_by(func.lower(User.username))
+        .all()
+    )
+
+    return jsonify([{"id": user.id, "username": user.username} for user in users])
+
+
+@app.route("/chat/dm/<int:user_id>", methods=["GET"])
+@login_required
+def chat_dm(user_id: int):
+    viewer = get_current_user()
+    if viewer is None:
+        return jsonify({"error": "Authentication required."}), 401
+
+    other = db.session.get(User, user_id)
+    if other is None:
+        return jsonify({"error": "User not found."}), 404
+
+    messages = (
+        Message.query.filter(
+            or_(
+                (Message.sender_id == viewer.id) & (Message.receiver_id == other.id),
+                (Message.sender_id == other.id) & (Message.receiver_id == viewer.id),
+            )
+        )
+        .order_by(Message.created_at.asc())
+        .all()
+    )
+
+    return jsonify(
+        [
+            {
+                "created_at": message.created_at.strftime("%d %b %H:%M"),
+                "sender": message.sender.username,
+                "content": message.content,
+            }
+            for message in messages
+        ]
+    )
+
+
+@app.route("/chat/dm/send", methods=["POST"])
+@login_required
+def chat_dm_send():
+    viewer = get_current_user()
+    if viewer is None:
+        return jsonify({"error": "Authentication required."}), 401
+
+    payload = request.get_json(silent=True) or {}
+    receiver_id = payload.get("receiver_id")
+    content = (payload.get("content") or "").strip()
+
+    if not isinstance(receiver_id, int):
+        return jsonify({"success": False, "error": "Invalid receiver."}), 400
+
+    if not content:
+        return jsonify({"success": False, "error": "Message cannot be empty."}), 400
+
+    if len(content) > 500:
+        return jsonify({"success": False, "error": "Message too long."}), 400
+
+    if receiver_id == viewer.id:
+        return jsonify({"success": False, "error": "Cannot message yourself."}), 400
+
+    receiver = db.session.get(User, receiver_id)
+    if receiver is None:
+        return jsonify({"success": False, "error": "Receiver not found."}), 404
+
+    message = Message(sender_id=viewer.id, receiver_id=receiver.id, content=content)
+    db.session.add(message)
+    db.session.commit()
+
+    return jsonify({"success": True})
+
+
 @app.route("/api/profile", methods=["PUT"])
 @login_required
 def api_update_profile():
@@ -986,7 +1087,7 @@ def api_update_account(account_id: int):
     if account is None:
         return jsonify({"error": "Account not found."}), 404
 
-    source = request.get_json(silent=True) or 
+    source = request.get_json(silent=True) or {}
     payload, errors = validate_account_payload(source)
 
     if errors:

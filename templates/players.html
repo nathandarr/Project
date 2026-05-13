@@ -4,214 +4,559 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Players - Game Account Manager</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+
     <style>
-        * {
-            box-sizing: border-box;
+        :root {
+            --bg: #f6f8fc;
+            --surface: #ffffff;
+            --surface-muted: #f9fafb;
+            --border: #e5e7eb;
+            --border-strong: #d1d5db;
+            --text: #0f172a;
+            --text-muted: #475569;
+            --text-subtle: #64748b;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-soft: #eef2ff;
+            --success: #16a34a;
+            --success-soft: #dcfce7;
+            --danger: #dc2626;
+            --danger-soft: #fee2e2;
+            --warning: #d97706;
+            --warning-soft: #fef3c7;
+            --info: #2563eb;
+            --info-soft: #dbeafe;
+            --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
+            --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06), 0 2px 4px rgba(15, 23, 42, 0.04);
+            --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.08), 0 4px 8px rgba(15, 23, 42, 0.04);
+            --radius-md: 12px;
+            --radius-lg: 16px;
         }
+
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
 
         body {
             margin: 0;
-            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            background: #f4f6fb;
-            color: #222;
+            font-family: "Inter", "Segoe UI", Tahoma, sans-serif;
+            background:
+                radial-gradient(1200px 600px at 10% -10%, #e0e7ff 0%, transparent 60%),
+                radial-gradient(1000px 500px at 100% 0%, #ddd6fe 0%, transparent 55%),
+                var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
         }
 
+        /* ===== Header ===== */
         header {
-            background: #1f2937;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             color: white;
-            padding: 20px 32px;
+            padding: 18px 32px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             gap: 16px;
             flex-wrap: wrap;
+            box-shadow: var(--shadow-md);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            min-width: 0;
+        }
+
+        .header-user img {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
         }
 
         header h1 {
             margin: 0;
-            font-size: 28px;
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
         }
 
         header p {
-            margin: 4px 0 0;
-            font-size: 14px;
-            color: #d1d5db;
+            margin: 2px 0 0;
+            font-size: 13px;
+            color: #cbd5e1;
         }
 
         .header-actions {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
         }
 
         .header-btn {
-            display: inline-block;
-            padding: 10px 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 14px;
             border-radius: 10px;
             text-decoration: none;
             font-weight: 600;
-            border: none;
+            font-size: 14px;
+            border: 1px solid transparent;
             cursor: pointer;
-        }
-        .home-btn:hover {
-            background: #1d4ed8;
+            transition: all 0.2s ease;
+            font-family: inherit;
         }
 
-        .logout-btn:hover {
-            background: #dc2626;
+        .header-btn svg { width: 16px; height: 16px; }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.08);
+            color: #e2e8f0;
+            border-color: rgba(255, 255, 255, 0.12);
         }
-        .home-btn {
-            background: #2563eb;
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.16);
             color: white;
+            transform: translateY(-1px);
         }
 
         .logout-btn {
-            background: #ef4444;
-            color: white;
+            background: rgba(239, 68, 68, 0.15);
+            color: #fca5a5;
+            border-color: rgba(239, 68, 68, 0.3);
         }
 
+        .logout-btn:hover {
+            background: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+
+        /* ===== Container ===== */
         .container {
             max-width: 1200px;
-            margin: 30px auto;
+            margin: 32px auto;
             padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
         }
 
+        .page-intro {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .page-intro h2 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: var(--text);
+        }
+
+        .page-intro p {
+            margin: 4px 0 0;
+            color: var(--text-subtle);
+            font-size: 14px;
+        }
+
+        .player-count {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--primary-soft);
+            color: var(--primary);
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        /* ===== Flash Messages ===== */
         .flash-messages {
             display: flex;
             flex-direction: column;
             gap: 10px;
-            margin-bottom: 20px;
         }
 
         .flash-message {
-            padding: 12px 14px;
-            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
             font-weight: 500;
+            font-size: 14px;
+            border: 1px solid;
+            animation: slideIn 0.3s ease;
         }
 
-        .flash-success {
-            background: #e8f8ee;
-            color: #1f7a3f;
-            border: 1px solid #b7e4c7;
+        .flash-message svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .flash-danger {
-            background: #fff1f1;
-            color: #b02a37;
-            border: 1px solid #f0b6b6;
-        }
+        .flash-success { background: var(--success-soft); color: #166534; border-color: #bbf7d0; }
+        .flash-danger  { background: var(--danger-soft);  color: #991b1b; border-color: #fecaca; }
+        .flash-warning { background: var(--warning-soft); color: #92400e; border-color: #fde68a; }
+        .flash-info    { background: var(--info-soft);    color: #1e40af; border-color: #bfdbfe; }
 
-        .flash-warning {
-            background: #fff8e6;
-            color: #9a6700;
-            border: 1px solid #f7d58b;
-        }
-
-        .flash-info {
-            background: #eef4ff;
-            color: #1d4ed8;
-            border: 1px solid #c7d8ff;
-        }
-
+        /* ===== Player Grid ===== */
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 18px;
         }
 
-        .card {
-            background: white;
-            border-radius: 14px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        .player-card {
+            position: relative;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
             padding: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            transition: all 0.25s ease;
+            overflow: hidden;
         }
 
-        .card h2 {
-            margin: 0 0 8px;
-            font-size: 22px;
+        .player-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: linear-gradient(135deg, #eef2ff 0%, #f3e8ff 100%);
+            z-index: 0;
         }
 
-        .muted {
-            color: #666;
-            margin-bottom: 16px;
+        .player-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--primary);
+            box-shadow: var(--shadow-lg);
         }
 
-        .stats {
+        .player-head {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            position: relative;
+            z-index: 1;
+            margin-top: 8px;
+        }
+
+        .player-head img {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--surface);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+            flex-shrink: 0;
+        }
+
+        .player-head h2 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: var(--text);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .player-head .full-name {
+            margin: 2px 0 0;
+            font-size: 13px;
+            color: var(--text-subtle);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Mini stats */
+        .mini-stats {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 16px;
+            gap: 8px;
+            position: relative;
+            z-index: 1;
         }
 
-        .stat-box {
-            background: #eff6ff;
+        .mini-stat {
+            background: var(--surface-muted);
+            border: 1px solid var(--border);
             border-radius: 10px;
-            padding: 12px;
+            padding: 10px 8px;
             text-align: center;
+            transition: all 0.2s ease;
         }
 
-        .stat-box strong {
+        .mini-stat:hover {
+            background: var(--primary-soft);
+            border-color: var(--primary);
+        }
+
+        .mini-stat strong {
             display: block;
             font-size: 20px;
-            color: #1d4ed8;
+            font-weight: 800;
+            color: var(--text);
+            font-family: "JetBrains Mono", monospace;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
         }
 
+        .mini-stat span {
+            display: block;
+            margin-top: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-subtle);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Featured account */
         .featured {
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 10px;
-            padding: 12px;
-            margin-bottom: 16px;
+            background: var(--surface-muted);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            position: relative;
+            z-index: 1;
         }
 
-        .featured h3 {
-            margin: 0 0 8px;
-            font-size: 15px;
+        .featured-head {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 10px;
         }
 
-        .featured p {
-            margin: 4px 0;
-            font-size: 14px;
+        .featured-head svg {
+            width: 14px;
+            height: 14px;
+            color: var(--warning);
+        }
+
+        .featured-head h3 {
+            margin: 0;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .featured-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 12px;
+            font-size: 13px;
+        }
+
+        .featured-grid > div {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+
+        .featured-label {
+            font-size: 11px;
+            color: var(--text-subtle);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .featured-value {
+            color: var(--text);
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .featured-empty {
+            text-align: center;
+            color: var(--text-subtle);
+            font-size: 13px;
+            padding: 8px 0;
+        }
+
+        /* Status badge */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 600;
+            border: 1px solid;
+            white-space: nowrap;
+            width: fit-content;
+        }
+
+        .badge::before {
+            content: "";
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .badge-active { background: var(--success-soft); color: var(--success); border-color: #bbf7d0; }
+        .badge-inactive { background: #f1f5f9; color: var(--text-subtle); border-color: #e2e8f0; }
+
+        /* Card actions */
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: auto;
+            position: relative;
+            z-index: 1;
         }
 
         .btn {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
             padding: 10px 14px;
             border-radius: 10px;
             text-decoration: none;
             font-weight: 600;
-            background: #2563eb;
-            color: white;
+            font-size: 13px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.18s ease;
+            flex: 1;
         }
 
+        .btn svg { width: 14px; height: 14px; }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 1px 2px rgba(79, 70, 229, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--text);
+            border-color: var(--border-strong);
+        }
+
+        .btn-secondary:hover {
+            background: var(--success-soft);
+            color: var(--success);
+            border-color: #bbf7d0;
+        }
+
+        /* Empty state */
         .empty-state {
-            background: white;
-            border-radius: 14px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-            padding: 28px;
+            background: var(--surface);
+            border: 1px dashed var(--border-strong);
+            border-radius: var(--radius-lg);
+            padding: 56px 24px;
             text-align: center;
-            color: #666;
+            color: var(--text-subtle);
+        }
+
+        .empty-state svg {
+            width: 56px;
+            height: 56px;
+            color: #cbd5e1;
+            margin-bottom: 16px;
+        }
+
+        .empty-state h3 {
+            margin: 0 0 6px;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .empty-state p { margin: 0; font-size: 14px; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header { padding: 14px 18px; }
+            header h1 { font-size: 18px; }
+            header p { font-size: 12px; }
+            .header-user img { width: 44px; height: 44px; }
+            .container { padding: 0 14px; margin: 20px auto; gap: 18px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
         }
     </style>
 </head>
 <body>
+{% include "_vault_chamber_bg.html" %}
 <header>
-    <div style="display: flex; align-items: center; gap: 16px;">
+    <div class="header-user">
         <img
-            src="{{ url_for('static', filename=current_user.avatar_path) if current_user.avatar_path else 'https://ui-avatars.com/api/?name=' + (current_user.username | urlencode) + '&size=60&background=667eea&color=fff' }}"
+            src="{{ url_for('static', filename=current_user.avatar_path) if current_user.avatar_path else 'https://ui-avatars.com/api/?name=' + (current_user.username | urlencode) + '&size=120&background=4f46e5&color=fff&bold=true' }}"
             alt="{{ current_user.username }}"
-            style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid white;"
         />
         <div>
             <h1>Players</h1>
-            <p>Browse other players and view their game account profiles.</p>
+            <p>Browse other players and view their game profiles.</p>
         </div>
     </div>
 
     <div class="header-actions">
-        <a href="{{ url_for('dashboard') }}" class="header-btn home-btn">Dashboard</a>
-        <a href="{{ url_for('profile') }}" class="header-btn home-btn">Profile</a>
-        <a href="{{ url_for('logout') }}" class="header-btn logout-btn">Logout</a>
+        <a href="{{ url_for('dashboard') }}" class="header-btn nav-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+            Dashboard
+        </a>
+        <a href="{{ url_for('profile') }}" class="header-btn nav-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Profile
+        </a>
+        <a href="{{ url_for('logout') }}" class="header-btn logout-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Logout
+        </a>
     </div>
 </header>
 
@@ -220,67 +565,124 @@
         {% if messages %}
             <div class="flash-messages">
                 {% for category, message in messages %}
-                    <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                    <div class="flash-message flash-{{ category }}" role="alert">
+                        {% if category == 'success' %}
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        {% elif category == 'danger' %}
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                        {% elif category == 'warning' %}
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        {% else %}
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        {% endif %}
+                        <span>{{ message }}</span>
+                    </div>
                 {% endfor %}
             </div>
         {% endif %}
     {% endwith %}
 
+    <div class="page-intro">
+        <div>
+            <h2>Community Players</h2>
+            <p>Discover other players, view their accounts, and start a conversation.</p>
+        </div>
+        {% if players %}
+            <span class="player-count">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                {{ players|length }} player{{ '' if players|length == 1 else 's' }}
+            </span>
+        {% endif %}
+    </div>
+
     {% if players %}
         <div class="grid">
             {% for item in players %}
-                <section class="card">
-                    <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 10px;">
+                <article class="player-card">
+                    <div class="player-head">
                         <img
-                            src="{{ url_for('static', filename=item.user.avatar_path) if item.user.avatar_path else 'https://ui-avatars.com/api/?name=' + (item.user.username | urlencode) + '&size=60&background=667eea&color=fff' }}"
+                            src="{{ url_for('static', filename=item.user.avatar_path) if item.user.avatar_path else 'https://ui-avatars.com/api/?name=' + (item.user.username | urlencode) + '&size=120&background=4f46e5&color=fff&bold=true' }}"
                             alt="{{ item.user.username }}"
-                            style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #2563eb;"
                         />
-                        <h2 style="margin: 0;">{{ item.user.username }}</h2>
-                    </div>
-                    <div class="muted">
-                        {{ item.user.full_name if item.user.full_name else item.user.username }}
+                        <div style="min-width: 0;">
+                            <h2>{{ item.user.username }}</h2>
+                            <p class="full-name">{{ item.user.full_name if item.user.full_name else item.user.username }}</p>
+                        </div>
                     </div>
 
-                    <div class="stats">
-                        <div class="stat-box">
+                    <div class="mini-stats">
+                        <div class="mini-stat">
                             <strong>{{ item.total_accounts }}</strong>
-                            Accounts
+                            <span>Accounts</span>
                         </div>
-                        <div class="stat-box">
+                        <div class="mini-stat">
                             <strong>{{ item.total_games }}</strong>
-                            Games
+                            <span>Games</span>
                         </div>
-                        <div class="stat-box">
+                        <div class="mini-stat">
                             <strong>{{ item.highest_level }}</strong>
-                            Top Level
+                            <span>Top Lvl</span>
                         </div>
                     </div>
 
                     {% if item.featured_account %}
                         <div class="featured">
-                            <h3>Featured Account</h3>
-                            <p><strong>Game:</strong> {{ item.featured_account.game_name }}</p>
-                            <p><strong>Rank:</strong> {{ item.featured_account.rank }}</p>
-                            <p><strong>Region:</strong> {{ item.featured_account.region }}</p>
-                            <p><strong>Status:</strong> {{ item.featured_account.status }}</p>
+                            <div class="featured-head">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                <h3>Featured Account</h3>
+                            </div>
+                            <div class="featured-grid">
+                                <div>
+                                    <span class="featured-label">Game</span>
+                                    <span class="featured-value" title="{{ item.featured_account.game_name }}">{{ item.featured_account.game_name }}</span>
+                                </div>
+                                <div>
+                                    <span class="featured-label">Rank</span>
+                                    <span class="featured-value" title="{{ item.featured_account.rank }}">{{ item.featured_account.rank }}</span>
+                                </div>
+                                <div>
+                                    <span class="featured-label">Region</span>
+                                    <span class="featured-value">{{ item.featured_account.region }}</span>
+                                </div>
+                                <div>
+                                    <span class="featured-label">Status</span>
+                                    <span class="badge {{ 'badge-active' if item.featured_account.status == 'Active' else 'badge-inactive' }}">{{ item.featured_account.status }}</span>
+                                </div>
+                            </div>
                         </div>
                     {% else %}
                         <div class="featured">
-                            <h3>No game accounts yet</h3>
-                            <p>This player has not added any game accounts.</p>
+                            <div class="featured-empty">No game accounts yet</div>
                         </div>
                     {% endif %}
 
-                    <a class="btn" href="{{ url_for('public_profile', user_id=item.user.id) }}">View Profile</a>
-                </section>
+                    <div class="card-actions">
+                        <a class="btn btn-primary" href="{{ url_for('public_profile', user_id=item.user.id) }}">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            View Profile
+                        </a>
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-chat-with-id="{{ item.user.id }}"
+                            data-chat-with-username="{{ item.user.username }}"
+                        >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                            Message
+                        </button>
+                    </div>
+                </article>
             {% endfor %}
         </div>
     {% else %}
         <div class="empty-state">
-            No other players found yet.
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <h3>No other players yet</h3>
+            <p>Once new players join, they'll appear here.</p>
         </div>
     {% endif %}
 </div>
+
+{% include "_chat_widget.html" %}
 </body>
 </html>
