@@ -68,7 +68,15 @@
     </div>
 
     {% if players %}
-        <div class="grid">
+        <div class="search-bar">
+            <input
+                type="text"
+                id="playerSearch"
+                placeholder="Search players by username..."
+                onkeyup="filterPlayers()"
+            />
+        </div>
+    <div class="grid" id="playerGrid">
             {% for item in players %}
                 <article class="player-card">
                     <div class="player-head">
@@ -154,11 +162,44 @@
                 </article>
             {% endfor %}
         </div>
-    {% else %}
+    
+        {% else %}
         <div class="empty-state">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             <h3>No other players yet</h3>
             <p>Once new players join, they'll appear here.</p>
         </div>
     {% endif %}
+
+    <div id="noResults" style="display: none; text-align: center; padding: 48px 24px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; margin-top: 16px;">
+        <div style="font-size: 48px; margin-bottom: 16px;">🔍</div>
+        <h3 style="color: #f1f5f9; font-size: 18px; margin: 0 0 8px;">No players found</h3>
+        <p style="color: #cbd5e1; font-size: 14px; margin: 0;">No players match "<span id="searchTerm"></span>"</p>
+    </div>
+
+    <script>
+        function filterPlayers() {
+            const query = document.getElementById('playerSearch').value.toLowerCase();
+            const cards = document.querySelectorAll('#playerGrid .player-card');
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                const username = card.querySelector('h2').textContent.toLowerCase();
+                if (username.includes(query)) {
+                    card.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            const emptyMsg = document.getElementById('noResults');
+            if (visibleCount === 0) {
+                emptyMsg.style.display = 'block';
+                document.getElementById('searchTerm').textContent = query;
+            } else {
+                emptyMsg.style.display = 'none';
+            }
+        }
+    </script>
 {% endblock %}
