@@ -1,0 +1,196 @@
+/* ===== Admin dashboard ===== */
+
+.admin-card {
+    background: rgba(244, 240, 232, 0.95);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 22px;
+}
+
+.admin-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.admin-card-head h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.count-pill {
+    background: var(--primary-soft);
+    color: var(--primary);
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.admin-table-wrap {
+    overflow-x: auto;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.admin-table th {
+    background: var(--surface-muted);
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 700;
+    color: var(--text-subtle);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 11px;
+    border-bottom: 1px solid var(--border);
+}
+
+.admin-table td {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+    color: var(--text);
+}
+
+.admin-table tbody tr:hover { background: rgba(99, 102, 241, 0.04); }
+
+.admin-table tr.is-banned {
+    background: rgba(239, 68, 68, 0.06);
+}
+.admin-table tr.is-banned:hover { background: rgba(239, 68, 68, 0.10); }
+
+.user-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.user-cell img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--surface);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+}
+
+.user-cell strong {
+    display: block;
+    color: var(--text);
+}
+
+.user-cell small {
+    display: block;
+    color: var(--text-subtle);
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+.cell-mono {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 600;
+}
+
+.region-tag {
+    display: inline-block;
+    background: var(--info-soft);
+    color: var(--info);
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    border: 1px solid;
+}
+.badge-active { background: var(--success-soft); color: var(--success); border-color: #bbf7d0; }
+.badge-inactive { background: #f1f5f9; color: var(--text-subtle); border-color: #e2e8f0; }
+
+.status-pill {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    border: 1px solid;
+    margin-right: 4px;
+}
+.status-admin   { background: #ede9fe; color: #6d28d9; border-color: #ddd6fe; }
+.status-banned  { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
+.status-active  { background: #dcfce7; color: #166534; border-color: #bbf7d0; }
+
+.row-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.inline-form {
+    display: inline;
+    margin: 0;
+}
+
+.action-btn {
+    border: 1px solid;
+    border-radius: 8px;
+    padding: 5px 11px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+}
+
+.action-warning  { background: #fef3c7; color: #854d0e; border-color: #fde68a; }
+.action-warning:hover  { background: #fde68a; }
+
+.action-success  { background: #dcfce7; color: #166534; border-color: #bbf7d0; }
+.action-success:hover  { background: #bbf7d0; }
+
+.action-secondary { background: var(--surface); color: var(--text); border-color: var(--border-strong); }
+.action-secondary:hover { background: var(--surface-muted); }
+
+.action-danger   { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
+.action-danger:hover   { background: #fecaca; }
+
+.self-tag {
+    color: var(--text-subtle);
+    font-size: 12px;
+    font-style: italic;
+}
+
+.empty-state {
+    text-align: center;
+    color: var(--text-subtle);
+    padding: 40px 20px;
+}
+
+@media (max-width: 768px) {
+    .admin-card { padding: 16px; }
+    .admin-table { font-size: 12px; }
+    .row-actions { flex-direction: column; }
+}

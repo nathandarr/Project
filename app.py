@@ -1,14 +1,18 @@
 import os
-from datetime import date, datetime
+import sys
+from datetime import date
 from functools import wraps
 from typing import Any
 
-from flask import Flask, flash, jsonify, redirect, render_template, request, session, url_for
+# Allow `python app.py` to coexist with companion modules that do
+# `from app import ...`. Without this alias Python loads app.py twice
+# (once as __main__, once as `app`), and the second load races with
+# the still-importing first one — breaking `from models import ...` etc.
+sys.modules["app"] = sys.modules[__name__]
+
+from flask import Flask, flash, jsonify, redirect, request, session, url_for
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Date, DateTime, ForeignKey, Integer, String, func, inspect, or_, text
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from werkzeug.security import check_password_hash, generate_password_hash
-from werkzeug.utils import secure_filename
+from sqlalchemy import func, inspect, or_, text
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 INSTANCE_DIR = os.path.join(BASE_DIR, "instance")
@@ -34,93 +38,12 @@ db = SQLAlchemy(app)
 
 ALLOWED_REGIONS = {"OCE", "Asia", "EU", "NA"}
 ALLOWED_STATUSES = {"Active", "Inactive"}
+ALLOWED_TAGS = ["Casual", "LFG", "New Player", "Veteran", "Coach", "Streamer", "Solo", "Tryhard"]
 
 
-class User(db.Model):
-    __tablename__ = "users"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-
-    first_name: Mapped[str | None] = mapped_column(String(80), nullable=True)
-    last_name: Mapped[str | None] = mapped_column(String(80), nullable=True)
-    dob: Mapped[date | None] = mapped_column(Date, nullable=True)
-    country_code: Mapped[str | None] = mapped_column(String(10), nullable=True)
-    phone_number: Mapped[str | None] = mapped_column(String(30), nullable=True)
-
-    username: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
-    email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
-    password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
-    is_admin: Mapped[bool] = mapped_column(default=False)
-    avatar_path: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        nullable=False,
-        default=datetime.utcnow,
-        onupdate=datetime.utcnow,
-    )
-
-    game_accounts: Mapped[list["GameAccount"]] = relationship(
-        "GameAccount",
-        back_populates="user",
-        cascade="all, delete-orphan",
-        order_by="GameAccount.id.desc()",
-    )
-
-    def set_password(self, password: str) -> None:
-        self.password_hash = generate_password_hash(password)
-
-    def check_password(self, password: str) -> bool:
-        return check_password_hash(self.password_hash, password)
-
-    @property
-    def full_name(self) -> str:
-        first = (self.first_name or "").strip()
-        last = (self.last_name or "").strip()
-        return f"{first} {last}".strip()
-
-
-class GameAccount(db.Model):
-    __tablename__ = "game_accounts"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    game_name: Mapped[str] = mapped_column(String(100), nullable=False)
-    account_name: Mapped[str] = mapped_column(String(100), nullable=False)
-    region: Mapped[str] = mapped_column(String(50), nullable=False, default="OCE")
-    level: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
-    rank: Mapped[str] = mapped_column(String(50), nullable=False, default="Unranked")
-    status: Mapped[str] = mapped_column(String(20), nullable=False, default="Active")
-    notes: Mapped[str] = mapped_column(String(500), nullable=False, default="")
-
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
-    user: Mapped["User"] = relationship("User", back_populates="game_accounts")
-
-class ProfileComment(db.Model):
-    __tablename__ = "profile_comments"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    body: Mapped[str] = mapped_column(String(500), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
-
-    author_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
-    profile_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
-
-    author: Mapped["User"] = relationship("User", foreign_keys=[author_id])
-    profile_user: Mapped["User"] = relationship("User", foreign_keys=[profile_user_id])
-
-
-class Message(db.Model):
-    __tablename__ = "messages"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    content: Mapped[str] = mapped_column(String(500), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
-
-    sender_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
-    receiver_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
-
-    sender: Mapped["User"] = relationship("User", foreign_keys=[sender_id])
-    receiver: Mapped["User"] = relationship("User", foreign_keys=[receiver_id])
+# Models live in models.py — imported as a side effect so SQLAlchemy
+# registers the classes against `db` before db.create_all() runs below.
+from models import GameAccount, User  # noqa: E402  (used by helpers below)
 
 
 def add_missing_user_profile_columns() -> None:
@@ -149,6 +72,8 @@ def add_missing_user_profile_columns() -> None:
         statements.append("ALTER TABLE users ADD COLUMN updated_at DATETIME")
     if "avatar_path" not in existing_columns:
         statements.append("ALTER TABLE users ADD COLUMN avatar_path VARCHAR(255)")
+    if "is_banned" not in existing_columns:
+        statements.append("ALTER TABLE users ADD COLUMN is_banned BOOLEAN NOT NULL DEFAULT 0")
     
     if not statements:
         return
@@ -168,16 +93,35 @@ def add_missing_user_profile_columns() -> None:
         )
 
 
+def add_missing_game_account_columns() -> None:
+    inspector = inspect(db.engine)
+    if "game_accounts" not in set(inspector.get_table_names()):
+        return
+
+    columns = {c["name"] for c in inspector.get_columns("game_accounts")}
+    if "tags" in columns:
+        return
+
+    with db.engine.begin() as connection:
+        connection.execute(text("ALTER TABLE game_accounts ADD COLUMN tags VARCHAR(200) NOT NULL DEFAULT ''"))
+
+
 with app.app_context():
     db.create_all()
     add_missing_user_profile_columns()
+    add_missing_game_account_columns()
 
 
 def get_current_user() -> User | None:
     user_id = session.get("user_id")
     if not user_id:
         return None
-    return db.session.get(User, user_id)
+    user = db.session.get(User, user_id)
+    # Banned users are treated as logged-out — get_current_user returns None,
+    # @login_required clears their session, and they're sent to /login.
+    if user is not None and user.is_banned:
+        return None
+    return user
 
 
 def is_api_request() -> bool:
@@ -197,6 +141,27 @@ def login_required(view_func):
             flash("Please log in to access that page.", "warning")
             return redirect(url_for("login"))
 
+        return view_func(*args, **kwargs)
+
+    return wrapped_view
+
+
+def admin_required(view_func):
+    """Like login_required, but also requires user.is_admin."""
+    @wraps(view_func)
+    def wrapped_view(*args, **kwargs):
+        user = get_current_user()
+        if user is None:
+            session.clear()
+            if is_api_request():
+                return jsonify({"error": "Authentication required."}), 401
+            flash("Please log in to access that page.", "warning")
+            return redirect(url_for("login"))
+        if not user.is_admin:
+            if is_api_request():
+                return jsonify({"error": "Admin access required."}), 403
+            flash("Admin access required.", "danger")
+            return redirect(url_for("dashboard"))
         return view_func(*args, **kwargs)
 
     return wrapped_view
@@ -368,6 +333,7 @@ def serialize_account(account: GameAccount) -> dict[str, Any]:
         "rank": account.rank,
         "status": account.status,
         "notes": account.notes,
+        "tags": account.tag_list,
         "user_id": account.user_id,
     }
 
@@ -397,6 +363,21 @@ def validate_account_payload(source: dict[str, Any]) -> tuple[dict[str, Any], li
     rank = str(source.get("rank", "")).strip()
     status = str(source.get("status", "")).strip()
     notes = str(source.get("notes", "")).strip()
+
+    # Tags: HTML form sends multiple values when checkboxes share a name.
+    # request.form (a MultiDict) provides .getlist; JSON payloads pass a list.
+    if hasattr(source, "getlist"):
+        raw_tags = source.getlist("tags")
+    else:
+        raw = source.get("tags", [])
+        raw_tags = raw if isinstance(raw, list) else [raw]
+
+    seen: list[str] = []
+    for tag in raw_tags:
+        clean = str(tag).strip()
+        if clean and clean in ALLOWED_TAGS and clean not in seen:
+            seen.append(clean)
+    tags = ",".join(seen)
 
     errors: list[str] = []
 
@@ -430,702 +411,19 @@ def validate_account_payload(source: dict[str, Any]) -> tuple[dict[str, Any], li
         "rank": rank,
         "status": status,
         "notes": notes,
+        "tags": tags,
     }
 
     return payload, errors
 
-def build_user_summary(user: User) -> dict[str, Any]:
-    accounts = (
-        GameAccount.query.filter_by(user_id=user.id)
-        .order_by(GameAccount.level.desc(), GameAccount.id.desc())
-        .all()
-    )
+# Register routes from companion modules. Imported as side effects so the
+# @app.route decorators inside each module attach to this app.
+import pages    # noqa: E402, F401
+import actions  # noqa: E402, F401
+import chat     # noqa: E402, F401
+import api      # noqa: E402, F401
+import admin    # noqa: E402, F401
 
-    featured_account = accounts[0] if accounts else None
-
-    return {
-        "user": user,
-        "total_accounts": len(accounts),
-        "total_games": len({account.game_name.lower() for account in accounts}),
-        "highest_level": max((account.level for account in accounts), default=0),
-        "featured_account": featured_account,
-    }
-
-
-def validate_comment_body(raw_body: str) -> tuple[str, list[str]]:
-    body = raw_body.strip()
-    errors: list[str] = []
-
-    if not body:
-        errors.append("Comment cannot be empty.")
-    elif len(body) > 500:
-        errors.append("Comment must be 500 characters or less.")
-
-    return body, errors
-
-
-
-@app.route("/")
-def mainmenu():
-    return render_template("index.html")
-
-
-@app.route("/home")
-def home():
-    return redirect(url_for("mainmenu"))
-
-
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    if get_current_user() is not None:
-        return redirect(url_for("dashboard"))
-
-    if request.method == "POST":
-        identifier = request.form.get("identifier", "").strip()
-        password = request.form.get("password", "")
-
-        if not identifier or not password:
-            flash("Please enter both username/email and password.", "danger")
-            return render_template("login.html")
-
-        normalized_identifier = identifier.lower()
-
-        user = User.query.filter(
-            or_(
-                func.lower(User.username) == normalized_identifier,
-                func.lower(User.email) == normalized_identifier,
-            )
-        ).first()
-
-        if user and user.check_password(password):
-            session.clear()
-            session["user_id"] = user.id
-            flash("Login successful!", "success")
-            return redirect(url_for("dashboard"))
-
-        flash("Invalid username/email or password.", "danger")
-        return render_template("login.html")
-
-    return render_template("login.html")
-
-
-@app.route("/register", methods=["GET", "POST"])
-def register():
-    if get_current_user() is not None:
-        return redirect(url_for("dashboard"))
-
-    if request.method == "POST":
-        cleaned_data, new_password, _, errors = validate_user_profile_form(
-            request.form,
-            current_user_id=None,
-            require_password=True,
-        )
-
-        if errors:
-            for error in errors:
-                flash(error, "danger")
-            return render_template("register.html")
-
-        if new_password is None:
-            flash("Password is required.", "danger")
-            return render_template("register.html")
-
-        user = User(
-            first_name=cleaned_data["first_name"],
-            last_name=cleaned_data["last_name"],
-            dob=cleaned_data["dob"],
-            country_code=cleaned_data["country_code"],
-            phone_number=cleaned_data["phone_number"],
-            username=cleaned_data["username"],
-            email=cleaned_data["email"],
-        )
-        user.set_password(new_password)
-
-        db.session.add(user)
-        db.session.commit()
-
-        flash("Registration successful! Please log in.", "success")
-        return redirect(url_for("login"))
-
-    return render_template("register.html")
-
-
-@app.route("/dashboard")
-@login_required
-def dashboard():
-    user = get_current_user()
-    if user is None:
-        flash("Please log in to access that page.", "warning")
-        return redirect(url_for("login"))
-
-    edit_id = request.args.get("edit", type=int)
-    editing_account = None
-
-    if edit_id is not None:
-        editing_account = GameAccount.query.filter_by(id=edit_id, user_id=user.id).first()
-        if editing_account is None:
-            flash("Account not found.", "danger")
-            return redirect(url_for("dashboard"))
-
-    accounts = (
-        GameAccount.query.filter_by(user_id=user.id)
-        .order_by(GameAccount.id.desc())
-        .all()
-    )
-
-    total_accounts = len(accounts)
-    total_games = len({account.game_name.lower() for account in accounts})
-    highest_level = max((account.level for account in accounts), default=0)
-
-    return render_template(
-        "dashboard.html",
-        user=user,
-        accounts=accounts,
-        total_accounts=total_accounts,
-        total_games=total_games,
-        highest_level=highest_level,
-        editing_account=editing_account,
-    )
-
-
-@app.route("/accounts/add", methods=["POST"])
-@login_required
-def add_account():
-    user = get_current_user()
-    if user is None:
-        flash("Please log in to access that page.", "warning")
-        return redirect(url_for("login"))
-
-    payload, errors = validate_account_payload(request.form)
-
-    if errors:
-        for error in errors:
-            flash(error, "danger")
-        return redirect(url_for("dashboard"))
-
-    account = GameAccount(user_id=user.id, **payload)
-    db.session.add(account)
-    db.session.commit()
-
-    flash("Game account added successfully!", "success")
-    return redirect(url_for("dashboard"))
-
-
-@app.route("/accounts/update/<int:account_id>", methods=["POST"])
-@login_required
-def update_account(account_id: int):
-    user = get_current_user()
-    if user is None:
-        flash("Please log in to access that page.", "warning")
-        return redirect(url_for("login"))
-
-    account = GameAccount.query.filter_by(id=account_id, user_id=user.id).first()
-    if account is None:
-        flash("Account not found.", "danger")
-        return redirect(url_for("dashboard"))
-
-    payload, errors = validate_account_payload(request.form)
-
-    if errors:
-        for error in errors:
-            flash(error, "danger")
-        return redirect(url_for("dashboard", edit=account_id))
-
-    account.game_name = payload["game_name"]
-    account.account_name = payload["account_name"]
-    account.region = payload["region"]
-    account.level = payload["level"]
-    account.rank = payload["rank"]
-    account.status = payload["status"]
-    account.notes = payload["notes"]
-
-    db.session.commit()
-
-    flash("Game account updated successfully!", "success")
-    return redirect(url_for("dashboard"))
-
-
-@app.route("/accounts/delete/<int:account_id>", methods=["POST"])
-@login_required
-def delete_account(account_id: int):
-    user = get_current_user()
-    if user is None:
-        flash("Please log in to access that page.", "warning")
-        return redirect(url_for("login"))
-
-    account = GameAccount.query.filter_by(id=account_id, user_id=user.id).first()
-    if account is None:
-        flash("Account not found.", "danger")
-        return redirect(url_for("dashboard"))
-
-    db.session.delete(account)
-    db.session.commit()
-
-    flash("Game account deleted successfully.", "info")
-    return redirect(url_for("dashboard"))
-
-
-@app.route("/logout")
-@login_required
-def logout():
-    session.clear()
-    flash("You have been logged out.", "info")
-    return redirect(url_for("mainmenu"))
-
-
-@app.route("/profile", methods=["GET", "POST"])
-@login_required
-def profile():
-    user = db.session.get(User, session["user_id"])
-
-    if user is None:
-        session.clear()
-        flash("Please log in again.", "warning")
-        return redirect(url_for("login"))
-
-    if request.method == "POST":
-        cleaned_data, new_password, current_password, errors = validate_user_profile_form(
-            request.form,
-            current_user_id=user.id,
-            require_password=False,
-        )
-
-        wants_password_change = bool(
-            request.form.get("current_password", "")
-            or request.form.get("password", "")
-            or request.form.get("confirm_password", "")
-        )
-
-        if wants_password_change and not user.check_password(current_password):
-            errors.append("Current password is incorrect.")
-
-        if errors:
-            for error in errors:
-                flash(error, "danger")
-            return render_template("profile.html", user=user)
-
-        user.first_name = cleaned_data["first_name"]
-        user.last_name = cleaned_data["last_name"]
-        user.dob = cleaned_data["dob"]
-        user.country_code = cleaned_data["country_code"]
-        user.phone_number = cleaned_data["phone_number"]
-        user.username = cleaned_data["username"]
-        user.email = cleaned_data["email"]
-
-        if new_password:
-            user.set_password(new_password)
-
-        db.session.commit()
-
-        flash("Profile updated successfully!", "success")
-        return redirect(url_for("profile"))
-
-    return render_template("profile.html", user=user)
-
-@app.route("/profile/avatar", methods=["POST"])
-@login_required
-def upload_avatar():
-    user = get_current_user()
-    if user is None:
-        return redirect(url_for("login"))
-
-    if "avatar" not in request.files:
-        flash("No file selected.", "danger")
-        return redirect(url_for("profile"))
-
-    file = request.files["avatar"]
-
-    if file.filename == "":
-        flash("No file selected.", "danger")
-        return redirect(url_for("profile"))
-
-    if not allowed_file(file.filename):
-        flash("Only PNG, JPG, GIF and WEBP files are allowed.", "danger")
-        return redirect(url_for("profile"))
-
-    filename = secure_filename(f"user_{user.id}_{file.filename}")
-    file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
-
-    user.avatar_path = f"uploads/{filename}"
-    db.session.commit()
-
-    flash("Profile picture updated!", "success")
-    return redirect(url_for("profile"))
-
-@app.route("/players")
-@login_required
-def players():
-    current_user = get_current_user()
-    if current_user is None:
-        flash("Please log in to access that page.", "warning")
-        return redirect(url_for("login"))
-
-    users = (
-        User.query.filter(User.id != current_user.id)
-        .order_by(func.lower(User.username))
-        .all()
-    )
-
-    player_cards = [build_user_summary(user) for user in users]
-
-    return render_template(
-        "players.html",
-        current_user=current_user,
-        players=player_cards,
-    )
-
-
-@app.route("/players/<int:user_id>")
-@login_required
-def public_profile(user_id: int):
-    viewer = get_current_user()
-    if viewer is None:
-        flash("Please log in to access that page.", "warning")
-        return redirect(url_for("login"))
-
-    profile_user = db.session.get(User, user_id)
-    if profile_user is None:
-        flash("User not found.", "danger")
-        return redirect(url_for("players"))
-
-    accounts = (
-        GameAccount.query.filter_by(user_id=profile_user.id)
-        .order_by(GameAccount.level.desc(), GameAccount.id.desc())
-        .all()
-    )
-
-    comments = (
-        ProfileComment.query.filter_by(profile_user_id=profile_user.id)
-        .order_by(ProfileComment.created_at.desc())
-        .all()
-    )
-
-    total_accounts = len(accounts)
-    total_games = len({account.game_name.lower() for account in accounts})
-    highest_level = max((account.level for account in accounts), default=0)
-
-    return render_template(
-        "public_profile.html",
-        viewer=viewer,
-        profile_user=profile_user,
-        accounts=accounts,
-        comments=comments,
-        total_accounts=total_accounts,
-        total_games=total_games,
-        highest_level=highest_level,
-    )
-
-
-@app.route("/players/<int:user_id>/comments", methods=["POST"])
-@login_required
-def add_profile_comment(user_id: int):
-    viewer = get_current_user()
-    if viewer is None:
-        flash("Please log in to access that page.", "warning")
-        return redirect(url_for("login"))
-
-    profile_user = db.session.get(User, user_id)
-    if profile_user is None:
-        flash("User not found.", "danger")
-        return redirect(url_for("players"))
-
-    if viewer.id == profile_user.id:
-        flash("You cannot comment on your own public profile.", "warning")
-        return redirect(url_for("public_profile", user_id=user_id))
-
-    body, errors = validate_comment_body(request.form.get("body", ""))
-
-    if errors:
-        for error in errors:
-            flash(error, "danger")
-        return redirect(url_for("public_profile", user_id=user_id))
-
-    comment = ProfileComment(
-        body=body,
-        author_id=viewer.id,
-        profile_user_id=profile_user.id,
-    )
-
-    db.session.add(comment)
-    db.session.commit()
-
-    flash("Comment added successfully!", "success")
-    return redirect(url_for("public_profile", user_id=user_id))
-
-
-@app.route("/comments/<int:comment_id>/delete", methods=["POST"])
-@login_required
-def delete_profile_comment(comment_id: int):
-    viewer = get_current_user()
-    if viewer is None:
-        flash("Please log in to access that page.", "warning")
-        return redirect(url_for("login"))
-
-    comment = db.session.get(ProfileComment, comment_id)
-    if comment is None:
-        flash("Comment not found.", "danger")
-        return redirect(url_for("players"))
-
-    if viewer.id not in {comment.author_id, comment.profile_user_id}:
-        flash("You are not allowed to delete that comment.", "danger")
-        return redirect(url_for("public_profile", user_id=comment.profile_user_id))
-
-    profile_user_id = comment.profile_user_id
-
-    db.session.delete(comment)
-    db.session.commit()
-
-    flash("Comment deleted successfully.", "info")
-    return redirect(url_for("public_profile", user_id=profile_user_id))
-
-
-@app.route("/chat/users", methods=["GET"])
-@login_required
-def chat_users():
-    viewer = get_current_user()
-    if viewer is None:
-        return jsonify({"error": "Authentication required."}), 401
-
-    users = (
-        User.query.filter(User.id != viewer.id)
-        .order_by(func.lower(User.username))
-        .all()
-    )
-
-    return jsonify([{"id": user.id, "username": user.username} for user in users])
-
-
-@app.route("/chat/dm/<int:user_id>", methods=["GET"])
-@login_required
-def chat_dm(user_id: int):
-    viewer = get_current_user()
-    if viewer is None:
-        return jsonify({"error": "Authentication required."}), 401
-
-    other = db.session.get(User, user_id)
-    if other is None:
-        return jsonify({"error": "User not found."}), 404
-
-    messages = (
-        Message.query.filter(
-            or_(
-                (Message.sender_id == viewer.id) & (Message.receiver_id == other.id),
-                (Message.sender_id == other.id) & (Message.receiver_id == viewer.id),
-            )
-        )
-        .order_by(Message.created_at.asc())
-        .all()
-    )
-
-    return jsonify(
-        [
-            {
-                "created_at": message.created_at.strftime("%d %b %H:%M"),
-                "sender": message.sender.username,
-                "content": message.content,
-            }
-            for message in messages
-        ]
-    )
-
-
-@app.route("/chat/dm/send", methods=["POST"])
-@login_required
-def chat_dm_send():
-    viewer = get_current_user()
-    if viewer is None:
-        return jsonify({"error": "Authentication required."}), 401
-
-    payload = request.get_json(silent=True) or {}
-    receiver_id = payload.get("receiver_id")
-    content = (payload.get("content") or "").strip()
-
-    if not isinstance(receiver_id, int):
-        return jsonify({"success": False, "error": "Invalid receiver."}), 400
-
-    if not content:
-        return jsonify({"success": False, "error": "Message cannot be empty."}), 400
-
-    if len(content) > 500:
-        return jsonify({"success": False, "error": "Message too long."}), 400
-
-    if receiver_id == viewer.id:
-        return jsonify({"success": False, "error": "Cannot message yourself."}), 400
-
-    receiver = db.session.get(User, receiver_id)
-    if receiver is None:
-        return jsonify({"success": False, "error": "Receiver not found."}), 404
-
-    message = Message(sender_id=viewer.id, receiver_id=receiver.id, content=content)
-    db.session.add(message)
-    db.session.commit()
-
-    return jsonify({"success": True})
-
-
-@app.route("/api/profile", methods=["PUT"])
-@login_required
-def api_update_profile():
-    user = get_current_user()
-    if user is None:
-        return jsonify({"error": "Authentication required."}), 401
-
-    source = request.get_json(silent=True) or {}
-
-    cleaned_data, new_password, current_password, errors = validate_user_profile_form(
-        source,
-        current_user_id=user.id,
-        require_password=False,
-    )
-
-    wants_password_change = bool(
-        source.get("current_password", "")
-        or source.get("password", "")
-        or source.get("confirm_password", "")
-    )
-
-    if wants_password_change and not user.check_password(current_password):
-        errors.append("Current password is incorrect.")
-
-    if errors:
-        return jsonify({"errors": errors}), 400
-
-    user.first_name = cleaned_data["first_name"]
-    user.last_name = cleaned_data["last_name"]
-    user.dob = cleaned_data["dob"]
-    user.country_code = cleaned_data["country_code"]
-    user.phone_number = cleaned_data["phone_number"]
-    user.username = cleaned_data["username"]
-    user.email = cleaned_data["email"]
-
-    if new_password:
-        user.set_password(new_password)
-
-    db.session.commit()
-
-    return jsonify(
-        {
-            "message": "Profile updated successfully!",
-            "profile": serialize_user_profile(user),
-        }
-    )
-
-
-# ---------------------------
-# Optional JSON API endpoints
-# ---------------------------
-
-@app.route("/api/accounts", methods=["GET"])
-@login_required
-def api_get_accounts():
-    user = get_current_user()
-    if user is None:
-        return jsonify({"error": "Authentication required."}), 401
-
-    accounts = (
-        GameAccount.query.filter_by(user_id=user.id)
-        .order_by(GameAccount.id.desc())
-        .all()
-    )
-    return jsonify([serialize_account(account) for account in accounts])
-
-
-@app.route("/api/stats", methods=["GET"])
-@login_required
-def api_get_stats():
-    user = get_current_user()
-    if user is None:
-        return jsonify({"error": "Authentication required."}), 401
-
-    accounts = GameAccount.query.filter_by(user_id=user.id).all()
-
-    return jsonify(
-        {
-            "total_accounts": len(accounts),
-            "total_games": len({account.game_name.lower() for account in accounts}),
-            "highest_level": max((account.level for account in accounts), default=0),
-        }
-    )
-
-
-@app.route("/api/accounts", methods=["POST"])
-@login_required
-def api_create_account():
-    user = get_current_user()
-    if user is None:
-        return jsonify({"error": "Authentication required."}), 401
-
-    source = request.get_json(silent=True) or {}
-    payload, errors = validate_account_payload(source)
-
-    if errors:
-        return jsonify({"errors": errors}), 400
-
-    account = GameAccount(user_id=user.id, **payload)
-    db.session.add(account)
-    db.session.commit()
-
-    return (
-        jsonify(
-            {
-                "message": "Game account added successfully!",
-                "account": serialize_account(account),
-            }
-        ),
-        201,
-    )
-
-
-@app.route("/api/accounts/<int:account_id>", methods=["PUT"])
-@login_required
-def api_update_account(account_id: int):
-    user = get_current_user()
-    if user is None:
-        return jsonify({"error": "Authentication required."}), 401
-
-    account = GameAccount.query.filter_by(id=account_id, user_id=user.id).first()
-    if account is None:
-        return jsonify({"error": "Account not found."}), 404
-
-    source = request.get_json(silent=True) or {}
-    payload, errors = validate_account_payload(source)
-
-    if errors:
-        return jsonify({"errors": errors}), 400
-
-    account.game_name = payload["game_name"]
-    account.account_name = payload["account_name"]
-    account.region = payload["region"]
-    account.level = payload["level"]
-    account.rank = payload["rank"]
-    account.status = payload["status"]
-    account.notes = payload["notes"]
-
-    db.session.commit()
-
-    return jsonify(
-        {
-            "message": "Game account updated successfully!",
-            "account": serialize_account(account),
-        }
-    )
-
-
-@app.route("/api/accounts/<int:account_id>", methods=["DELETE"])
-@login_required
-def api_delete_account(account_id: int):
-    user = get_current_user()
-    if user is None:
-        return jsonify({"error": "Authentication required."}), 401
-
-    account = GameAccount.query.filter_by(id=account_id, user_id=user.id).first()
-    if account is None:
-        return jsonify({"error": "Account not found."}), 404
-
-    db.session.delete(account)
-    db.session.commit()
-
-    return jsonify({"message": "Game account deleted successfully."})
 
 if __name__ == "__main__":
     app.run(debug=True)
