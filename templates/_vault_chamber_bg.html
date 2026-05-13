@@ -1,0 +1,122 @@
+<style>
+    body {
+        background-image:
+            linear-gradient(rgba(5, 10, 20, 0.88), rgba(5, 10, 20, 0.95)),
+            url("{{ url_for('static', filename='image.jpg') }}") !important;
+        background-size: cover !important;
+        background-position: center center !important;
+        background-repeat: no-repeat !important;
+        background-attachment: fixed !important;
+        background-color: #050a14 !important;
+    }
+
+    body > header,
+    body > nav,
+    body > main,
+    body > .container,
+    body > footer {
+        position: relative;
+        z-index: 1;
+    }
+
+    @media (max-width: 700px) {
+        body {
+            /* fixed attachment is glitchy on iOS — fall back to scroll */
+            background-attachment: scroll !important;
+        }
+    }
+
+    /* Light gray for the main outer cards */
+    .card,
+    .player-card,
+    .profile-hero,
+    .avatar-card,
+    .empty-state {
+        background: rgba(209, 213, 219, 0.85) !important;
+    }
+
+    /* Dark gray for inner panels (stat boxes, comments) */
+    .stat-box,
+    .comment-item,
+    .comment-form {
+        background: rgba(55, 65, 81, 0.92) !important;
+        border-color: rgba(31, 41, 55, 0.7) !important;
+    }
+
+    /* Light text on dark gray panels */
+    .stat-box,
+    .stat-box h3,
+    .stat-box p,
+    .stat-box strong,
+    .comment-item,
+    .comment-item .comment-body,
+    .comment-item .comment-meta,
+    .comment-item strong {
+        color: #f3f4f6 !important;
+    }
+
+    .stat-box p,
+    .stat-box strong {
+        color: #fbbf24 !important;
+    }
+
+    /* Featured account panel on player cards — soft, NOT dark gray */
+    .featured {
+        background: rgba(255, 255, 255, 0.55) !important;
+        border-color: rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .featured h3,
+    .featured p,
+    .featured strong {
+        color: #1f2937 !important;
+    }
+
+    /* Table headers also dark gray */
+    thead {
+        background: rgba(31, 41, 55, 0.95) !important;
+    }
+
+    /* Form inputs across pages — gray */
+    input[type="text"],
+    input[type="number"],
+    input[type="email"],
+    input[type="password"],
+    input[type="date"],
+    input[type="tel"],
+    input[type="search"],
+    select,
+    textarea {
+        background: rgba(156, 163, 175, 0.4) !important;
+        color: #1f2937 !important;
+        border-color: rgba(75, 85, 99, 0.45) !important;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+        color: #4b5563 !important;
+    }
+
+    /* Profile upload area */
+    .upload-form {
+        background: rgba(156, 163, 175, 0.4) !important;
+        border-color: rgba(75, 85, 99, 0.45) !important;
+    }
+
+    .upload-form input[type="file"]::file-selector-button {
+        background: rgba(55, 65, 81, 0.92) !important;
+        color: #f3f4f6 !important;
+        border-color: rgba(31, 41, 55, 0.7) !important;
+    }
+
+    /* Comment textarea — keep its darker treatment (more specific selector wins) */
+    .comment-form textarea {
+        background: rgba(17, 24, 39, 0.85) !important;
+        color: #f3f4f6 !important;
+        border-color: rgba(75, 85, 99, 0.7) !important;
+    }
+
+    .comment-form textarea::placeholder {
+        color: #9ca3af !important;
+    }
+</style>

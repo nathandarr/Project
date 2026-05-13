@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Game Account Manager{% endblock %}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
+
+    {% block styles %}{% endblock %}
+</head>
+<body>
+{% include "_vault_chamber_bg.html" %}
+
+<header>
+    <div class="header-user">
+        {% block header_user %}{% endblock %}
+    </div>
+
+    <div class="header-actions">
+        {% if current_user and current_user.is_admin and request.endpoint != 'admin_dashboard' %}
+            <a href="{{ url_for('admin_dashboard') }}" class="header-btn admin-btn" title="Admin dashboard">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Admin
+            </a>
+        {% endif %}
+        {% block header_actions %}{% endblock %}
+    </div>
+</header>
+
+<div class="container">
+    {% block content %}{% endblock %}
+</div>
+
+{% block chat_widget %}
+    {% include "_chat_widget.html" %}
+{% endblock %}
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

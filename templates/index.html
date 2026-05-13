@@ -3,266 +3,1344 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GameVault</title>
+    <title>GameVault — All your game accounts, in one place</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg: #f6f8fc;
+            --surface: #ffffff;
+            --surface-muted: #f9fafb;
+            --border: #e5e7eb;
+            --border-strong: #d1d5db;
+            --text: #0f172a;
+            --text-muted: #475569;
+            --text-subtle: #64748b;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-soft: #eef2ff;
+            --success: #16a34a;
+            --success-soft: #dcfce7;
+            --danger: #dc2626;
+            --danger-soft: #fee2e2;
+            --warning: #d97706;
+            --warning-soft: #fef3c7;
+            --info: #2563eb;
+            --info-soft: #dbeafe;
+            --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
+            --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06), 0 2px 4px rgba(15, 23, 42, 0.04);
+            --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.08), 0 4px 8px rgba(15, 23, 42, 0.04);
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
         }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: "Inter", "Segoe UI", Tahoma, sans-serif;
+            color: var(--text);
+            background:
+                /* Warm spotlight behind the vault */
+                radial-gradient(900px 700px at 50% 28%, rgba(251, 191, 36, 0.14) 0%, transparent 65%),
+                /* Cool ambient corner glows */
+                radial-gradient(700px 500px at 0% 0%, rgba(79, 70, 229, 0.18) 0%, transparent 55%),
+                radial-gradient(700px 500px at 100% 0%, rgba(124, 58, 237, 0.16) 0%, transparent 55%),
+                /* Subtle bottom warmth */
+                radial-gradient(900px 500px at 50% 110%, rgba(244, 114, 182, 0.08) 0%, transparent 55%),
+                /* Dark vault chamber base */
+                linear-gradient(180deg, #0f172a 0%, #050a14 100%);
+            background-color: #050a14;
             min-height: 100vh;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
         }
 
-        .container {
-            max-width: 800px;
-            background: white;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            text-align: center;
+        /* ===== Topbar ===== */
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 32px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
         }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            font-size: 18px;
+            letter-spacing: -0.02em;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .brand-mark {
+            width: 32px;
+            height: 32px;
+            border-radius: 9px;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
+        }
+
+        .brand-mark svg { width: 18px; height: 18px; }
+
+        .topbar-actions { display: flex; gap: 8px; }
+
+        /* ===== Hero ===== */
+        .hero {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 20px 64px;
+        }
+
+        .hero-card {
+            position: relative;
+            max-width: 880px;
+            width: 100%;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            box-shadow: var(--shadow-lg);
+            padding: 48px 40px;
+            text-align: center;
+            overflow: hidden;
+            animation: rise 0.6s ease both;
+        }
+
+        @keyframes rise {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero-card::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%);
+        }
+
+        .badge-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--primary-soft);
+            color: var(--primary);
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .badge-pill svg { width: 12px; height: 12px; }
 
         h1 {
-            color: #444;
-            margin-bottom: 20px;
-            font-size: 2.5rem;
+            font-size: clamp(28px, 5vw, 44px);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            color: var(--text);
+            margin-bottom: 14px;
         }
 
-        p {
-            color: #666;
-            font-size: 1.1rem;
-            margin-bottom: 15px;
+        h1 .accent {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        #action-buttons {
+        .tagline {
+            color: var(--text-subtle);
+            font-size: 16px;
+            max-width: 520px;
+            margin: 0 auto 28px;
+        }
+
+        /* ===== Logged-in user block ===== */
+        .user-card {
+            display: inline-flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 20px;
+            background: var(--surface-muted);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            margin: 0 auto 24px;
+        }
+
+        .user-card img {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--surface);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+        }
+
+        .user-card-text {
+            text-align: left;
+        }
+
+        .user-card-text small {
+            display: block;
+            font-size: 12px;
+            color: var(--text-subtle);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .user-card-text strong {
+            font-size: 16px;
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        /* ===== Buttons ===== */
+        .btn-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 22px;
+            border: 1px solid transparent;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 140px;
+        }
+
+        .btn svg { width: 16px; height: 16px; }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 1px 2px rgba(79, 70, 229, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #15803d;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(22, 163, 74, 0.35);
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--text);
+            border-color: var(--border-strong);
+        }
+
+        .btn-secondary:hover {
+            background: var(--surface-muted);
+            border-color: var(--text-subtle);
+        }
+
+        .btn-violet {
+            background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+            color: white;
+        }
+
+        .btn-violet:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(124, 58, 237, 0.4);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-muted);
+        }
+
+        .btn-ghost:hover {
+            background: var(--surface-muted);
+            color: var(--text);
+        }
+
+        /* Authed full-width column */
+        .actions-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .actions-col .btn { min-width: 240px; }
+
+        /* ===== Flash Messages ===== */
+        .flash-messages {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+
+        .flash-messages > div {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: var(--info-soft);
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* ===== Features ===== */
+        .features {
+            margin-top: 36px;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            border-radius: var(--radius-xl);
+            padding: 28px 28px;
+            text-align: left;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .features::before {
+            content: "";
+            position: absolute;
+            top: -100px;
+            right: -100px;
+            width: 280px;
+            height: 280px;
+            background: radial-gradient(circle, rgba(124, 58, 237, 0.3) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .features h2 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: -0.01em;
+            position: relative;
+        }
+
+        .features h2 svg { width: 20px; height: 20px; color: #a78bfa; }
+
+        .features ul {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 10px;
+            position: relative;
+        }
+
+        .features li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            color: #e2e8f0;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .features li:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.16);
+        }
+
+        .features li::before {
+            content: "";
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234ade80' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: center;
+            flex-shrink: 0;
+        }
+
+        /* ===== Footer ===== */
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-subtle);
+            font-size: 13px;
+        }
+
+        @media (max-width: 600px) {
+            .topbar { padding: 14px 18px; }
+            .hero-card { padding: 36px 24px; border-radius: 20px; }
+            .btn-row { flex-direction: column; }
+            .btn { width: 100%; }
+            .features ul { grid-template-columns: 1fr; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* ===== Vault makeover ===== */
+        body { cursor: none; }
+        a, button { cursor: none; }
+
+        .hero-card {
+            background:
+                linear-gradient(180deg, #475569 0%, #334155 35%, #1e293b 100%);
+            border: 3px solid #0f172a;
+            box-shadow:
+                inset 0 6px 14px rgba(255, 255, 255, 0.08),
+                inset 0 -6px 14px rgba(0, 0, 0, 0.55),
+                0 28px 56px rgba(15, 23, 42, 0.45);
+        }
+
+        .hero-card::before {
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: auto;
+            background:
+                repeating-linear-gradient(
+                    180deg,
+                    rgba(255, 255, 255, 0.025) 0px,
+                    rgba(255, 255, 255, 0.025) 1px,
+                    transparent 1px,
+                    transparent 4px
+                );
+            pointer-events: none;
+        }
+
+        .hero-card::after {
+            content: "";
+            position: absolute;
+            inset: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            pointer-events: none;
+        }
+
+        .hero-card > * {
+            position: relative;
+            z-index: 2;
+        }
+
+        .rivet {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #cbd5e1 0%, #64748b 45%, #1e293b 100%);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.4);
+            z-index: 5;
+        }
+        .rivet.tl { top: 16px; left: 16px; }
+        .rivet.tr { top: 16px; right: 16px; }
+        .rivet.bl { bottom: 16px; left: 16px; }
+        .rivet.br { bottom: 16px; right: 16px; }
+
+        .hero-card .badge-pill {
+            background: rgba(251, 191, 36, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.35);
+        }
+
+        .hero-card h1 {
+            color: #fef3c7;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
+        }
+
+        .hero-card h1 .accent {
+            background: linear-gradient(180deg, #fef3c7 0%, #fbbf24 50%, #b45309 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-card .tagline {
+            color: #cbd5e1;
+        }
+
+        .hero-card .user-card {
+            background: rgba(15, 23, 42, 0.55);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .hero-card .user-card img {
+            border-color: #1e293b;
+        }
+
+        .hero-card .user-card-text small { color: #fbbf24; }
+        .hero-card .user-card-text strong { color: #fef3c7; }
+
+        /* Brass plate buttons (Dashboard / Players / Profile / Login / Signup / Learn More) */
+        .hero-card .btn-primary,
+        .hero-card .btn-success,
+        .hero-card .btn-violet {
+            background: linear-gradient(180deg, #fef3c7 0%, #fbbf24 45%, #b45309 100%);
+            color: #422006;
+            border: 1.5px solid #78350f;
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.7),
+                inset 0 -2px 0 rgba(120, 53, 15, 0.35),
+                0 4px 10px rgba(0, 0, 0, 0.4);
+            font-weight: 800;
+            letter-spacing: 0.04em;
+        }
+
+        .hero-card .btn-primary:hover,
+        .hero-card .btn-success:hover,
+        .hero-card .btn-violet:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.07);
+            background: linear-gradient(180deg, #fef3c7 0%, #fbbf24 45%, #b45309 100%);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.7),
+                inset 0 -2px 0 rgba(120, 53, 15, 0.35),
+                0 8px 18px rgba(0, 0, 0, 0.5),
+                0 0 18px rgba(251, 191, 36, 0.4);
+        }
+
+        /* Steel plate buttons (Logout / Learn More secondary) */
+        .hero-card .btn-secondary {
+            background: linear-gradient(180deg, #94a3b8 0%, #64748b 50%, #334155 100%);
+            color: #f8fafc;
+            border: 1.5px solid #1e293b;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.25),
+                inset 0 -2px 0 rgba(0, 0, 0, 0.3),
+                0 4px 10px rgba(0, 0, 0, 0.4);
+            font-weight: 700;
+        }
+
+        .hero-card .btn-secondary:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+            background: linear-gradient(180deg, #94a3b8 0%, #64748b 50%, #334155 100%);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.25),
+                inset 0 -2px 0 rgba(0, 0, 0, 0.3),
+                0 8px 18px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero-card .features {
+            background: linear-gradient(135deg, #0b1220 0%, #0f172a 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* ===== Key cursor ===== */
+        #key-cursor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 56px;
+            height: 22px;
+            pointer-events: none;
+            z-index: 9999;
+            transform-origin: 14px 11px;
+            will-change: transform;
+            filter: drop-shadow(0 2px 4px rgba(180, 83, 9, 0.5));
+        }
+
+        #key-cursor svg { width: 100%; height: 100%; display: block; }
+
+        .sparkle {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 6px;
+            pointer-events: none;
+            z-index: 9998;
+            background: radial-gradient(circle, #fbbf24 0%, rgba(251, 191, 36, 0) 70%);
+            border-radius: 50%;
+            animation: sparkleFade 700ms ease-out forwards;
+        }
+
+        @keyframes sparkleFade {
+            0%   { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(0.2); opacity: 0; }
+        }
+
+        body.is-hovering #key-cursor {
+            filter: drop-shadow(0 0 8px #fbbf24) drop-shadow(0 2px 4px rgba(180, 83, 9, 0.5));
+        }
+
+        @media (hover: none) {
+            body { cursor: auto; }
+            a, button { cursor: pointer; }
+            #key-cursor, .sparkle { display: none; }
+        }
+
+        /* ===== Vault navigation transition ===== */
+        #vault-loader {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            overflow: hidden;
+            background: #050a14;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+        }
+
+        #vault-loader.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        #vault-loader.opened {
+            pointer-events: none;
+        }
+
+        .vault-door {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 50%;
+            background:
+                linear-gradient(180deg, #475569 0%, #334155 50%, #1e293b 100%);
+            transition: transform 0.7s cubic-bezier(0.6, 0, 0.3, 1);
+        }
+
+        .vault-door::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                180deg,
+                rgba(255, 255, 255, 0.025) 0px,
+                rgba(255, 255, 255, 0.025) 1px,
+                transparent 1px,
+                transparent 4px
+            );
+            pointer-events: none;
+        }
+
+        .vault-door-left {
+            left: 0;
+            border-right: 4px solid #0f172a;
+            box-shadow:
+                inset -10px 0 24px rgba(0, 0, 0, 0.7),
+                inset 0 8px 18px rgba(255, 255, 255, 0.08),
+                inset 0 -8px 18px rgba(0, 0, 0, 0.6);
+        }
+
+        .vault-door-right {
+            right: 0;
+            border-left: 4px solid #0f172a;
+            box-shadow:
+                inset 10px 0 24px rgba(0, 0, 0, 0.7),
+                inset 0 8px 18px rgba(255, 255, 255, 0.08),
+                inset 0 -8px 18px rgba(0, 0, 0, 0.6);
+        }
+
+        #vault-loader.opened .vault-door-left  { transform: translateX(-101%); }
+        #vault-loader.opened .vault-door-right { transform: translateX(101%); }
+
+        /* Door rivets */
+        .door-rivet {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #cbd5e1 0%, #64748b 45%, #1e293b 100%);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.4);
+        }
+
+        .vault-door-left .door-rivet { right: 28px; }
+        .vault-door-right .door-rivet { left: 28px; }
+        .door-rivet.r1 { top: 8%; }
+        .door-rivet.r2 { top: 30%; }
+        .door-rivet.r3 { top: 70%; }
+        .door-rivet.r4 { top: 92%; }
+
+        /* Dial */
+        .dial-wrap {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 240px;
+            height: 240px;
+            z-index: 10;
+            transition: opacity 0.3s ease, transform 0.4s ease;
+        }
+
+        #vault-loader.opened .dial-wrap {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.8);
+        }
+
+        .dial-body {
+            width: 100%;
+            height: 100%;
+            transform-origin: 50% 50%;
+            filter: drop-shadow(0 12px 32px rgba(0, 0, 0, 0.7));
+        }
+
+        #vault-loader.active .dial-body {
+            animation: dialSpin 1.4s cubic-bezier(0.4, 0, 0.4, 1) 0.25s forwards;
+        }
+
+        @keyframes dialSpin {
+            0%   { transform: rotate(0deg); }
+            55%  { transform: rotate(720deg); }
+            85%  { transform: rotate(840deg); }
+            100% { transform: rotate(815deg); }
+        }
+
+        .dial-indicator {
+            position: absolute;
+            top: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 11px solid transparent;
+            border-right: 11px solid transparent;
+            border-top: 20px solid #fbbf24;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+            z-index: 11;
+        }
+
+        .unlock-flash {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(251, 191, 36, 0.45) 0%, transparent 55%);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 6;
+        }
+
+        .unlock-flash.flash {
+            animation: flashPulse 0.5s ease;
+        }
+
+        @keyframes flashPulse {
+            0%   { opacity: 0; }
+            35%  { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        .loader-hint {
+            position: absolute;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #cbd5e1;
+            font-size: 11px;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            opacity: 0.5;
+            z-index: 12;
+            pointer-events: none;
+            font-weight: 600;
+        }
+
+        .loader-title {
+            position: absolute;
+            top: 12%;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #fef3c7;
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+            z-index: 11;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .loader-title .accent { color: #fbbf24; }
+
+        /* ===== Vault wheel buttons ===== */
+        .wheel-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 28px 16px;
+            justify-items: center;
+            margin: 8px auto 16px;
+            max-width: 360px;
+        }
+
+        .action-wheel {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 12px;
-            margin-top: 20px;
-        }
-
-        .top-buttons {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .bottom-button {
-            display: flex;
-            justify-content: center;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 12px 30px;
-            background: #667eea;
-            color: white;
             text-decoration: none;
-            border-radius: 5px;
-            font-size: 1rem;
-            margin: 0;
-            transition: background 0.3s;
-            border: none;
-            cursor: pointer;
+            transition: transform 0.25s ease;
+            color: inherit;
         }
 
-        .btn:hover {
-            background: #5a6fd8;
+        .action-wheel:hover { transform: translateY(-3px); }
+
+        .wheel-spinner {
+            position: relative;
+            width: 124px;
+            height: 124px;
         }
 
-        .btn.secondary {
-            background: #6c757d;
+        .wheel-body {
+            width: 100%;
+            height: 100%;
+            transform-origin: 50% 50%;
+            transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+            filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.5));
         }
 
-        .btn.secondary:hover {
-            background: #5a6268;
+        .action-wheel:hover .wheel-body {
+            transform: rotate(75deg);
+            filter: drop-shadow(0 10px 22px rgba(251, 191, 36, 0.4)) drop-shadow(0 6px 14px rgba(0, 0, 0, 0.5));
         }
 
-        .btn.success {
-            background: #28a745;
+        .action-wheel.danger:hover .wheel-body {
+            filter: drop-shadow(0 10px 22px rgba(248, 113, 113, 0.45)) drop-shadow(0 6px 14px rgba(0, 0, 0, 0.5));
         }
 
-        .btn.success:hover {
-            background: #218838;
+        .wheel-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 32px;
+            height: 32px;
+            transform: translate(-50%, -50%);
+            color: #fbbf24;
+            z-index: 2;
+            transition: transform 0.25s ease, color 0.25s ease;
+            pointer-events: none;
         }
 
-        .features {
-            margin-top: 30px;
-            text-align: left;
-            padding: 20px;
+        .action-wheel:hover .wheel-icon {
+            transform: translate(-50%, -50%) scale(1.12);
         }
 
-        .features h2 {
-            margin-bottom: 15px;
-            color: #444;
+        .action-wheel.danger .wheel-icon { color: #fca5a5; }
+        .action-wheel.danger:hover .wheel-icon { color: #f87171; }
+
+        .wheel-label {
+            color: #fef3c7;
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+            transition: color 0.25s ease;
         }
 
-        .features ul {
-            list-style: none;
+        .action-wheel.danger .wheel-label { color: #fecaca; }
+        .action-wheel.danger:hover .wheel-label { color: #fca5a5; }
+
+        @media (max-width: 480px) {
+            .wheel-spinner { width: 104px; height: 104px; }
+            .wheel-icon { width: 28px; height: 28px; }
+            .wheel-grid { gap: 22px 12px; }
         }
 
-        .features li {
-            padding: 8px 0;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            align-items: center;
+        /* ===== Engraved-in-vault text ===== */
+        .hero-card h1 {
+            font-family: "Cinzel", "Inter", Georgia, serif;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-shadow:
+                0 -1px 0 rgba(0, 0, 0, 0.85),
+                0 1px 0 rgba(255, 240, 200, 0.12),
+                0 2px 8px rgba(0, 0, 0, 0.45);
         }
 
-        .features li::before {
-            content: '✓';
-            color: #28a745;
-            margin-right: 10px;
-            font-weight: bold;
+        .hero-card h1 .accent {
+            text-shadow:
+                0 -1px 0 rgba(0, 0, 0, 0.85),
+                0 1px 0 rgba(254, 243, 199, 0.25);
         }
 
-        .features li {
-            color: white;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+        .hero-card .tagline {
+            text-shadow:
+                0 -1px 0 rgba(0, 0, 0, 0.7),
+                0 1px 0 rgba(255, 255, 255, 0.08);
         }
 
-        .flash-messages {
-            margin-bottom: 20px;
-            padding: 12px;
-            background: #eef4ff;
-            border: 1px solid #c7d8ff;
-            border-radius: 8px;
-            color: #333;
-            text-align: left;
+        .hero-card .features h2 {
+            font-family: "Cinzel", "Inter", Georgia, serif;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: #fde68a;
+            text-shadow:
+                0 -1px 0 rgba(0, 0, 0, 0.85),
+                0 1px 0 rgba(254, 243, 199, 0.18),
+                0 2px 6px rgba(0, 0, 0, 0.5);
         }
 
-        .flash-messages div {
-            margin-bottom: 6px;
+        .hero-card .features h2 svg {
+            color: #fbbf24;
+            filter: drop-shadow(0 -1px 0 rgba(0, 0, 0, 0.6)) drop-shadow(0 1px 0 rgba(254, 243, 199, 0.15));
         }
 
-        .flash-messages div:last-child {
-            margin-bottom: 0;
+        .hero-card .features li {
+            color: #94a3b8;
+            text-shadow:
+                0 -1px 0 rgba(0, 0, 0, 0.75),
+                0 1px 0 rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.02);
+            border-color: rgba(255, 255, 255, 0.05);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), inset 0 -1px 0 rgba(0, 0, 0, 0.4);
+        }
+
+        .hero-card .features li:hover {
+            color: #cbd5e1;
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .hero-card .badge-pill {
+            text-shadow:
+                0 -1px 0 rgba(0, 0, 0, 0.7),
+                0 1px 0 rgba(254, 243, 199, 0.15);
+        }
+
+        .hero-card .user-card-text strong {
+            text-shadow:
+                0 -1px 0 rgba(0, 0, 0, 0.7),
+                0 1px 0 rgba(254, 243, 199, 0.12);
+        }
+
+        .hero-card .user-card-text small {
+            text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.6);
+        }
+
+        /* ===== Topbar / footer on dark chamber ===== */
+        .topbar .brand {
+            color: #fef3c7;
+        }
+
+        .topbar .brand-mark {
+            box-shadow: 0 4px 16px rgba(79, 70, 229, 0.5);
+        }
+
+        .topbar .btn-ghost {
+            color: #cbd5e1;
+        }
+
+        .topbar .btn-ghost:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fef3c7;
         }
 
         footer {
-            margin-top: 20px;
-            color: white;
-            font-size: 0.9rem;
+            color: #64748b;
         }
-
-        @media (max-width: 600px) {
-            .top-buttons {
-                flex-direction: column;
-                width: 100%;
-            }
-
-            .btn {
-                width: 100%;
-                max-width: 280px;
-                text-align: center;
-            }
-        }
-        .profile-btn {
-            background: #764ba2;
-        }
-
-        .profile-btn:hover {
-            background: #5e3a85;
-        }
-    
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1 id="project-title">Welcome to GameVault</h1>
-        <p style="color: #888; font-size: 1rem; margin-top: -15px; margin-bottom: 15px; font-style: italic;">
-            All your game accounts, in one place.
-        </p>
+    <!-- Shared SVG defs -->
+    <svg style="position: absolute; width: 0; height: 0;" aria-hidden="true">
+        <defs>
+            <radialGradient id="wheelMetalGrad" cx="50%" cy="35%">
+                <stop offset="0%"  stop-color="#94a3b8"/>
+                <stop offset="60%" stop-color="#475569"/>
+                <stop offset="100%" stop-color="#1e293b"/>
+            </radialGradient>
+        </defs>
+    </svg>
 
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                <div class="flash-messages">
-                    {% for message in messages %}
-                        <div>{{ message }}</div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}
-
-        {% if current_user %}
-            <div style="display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 16px;">
-                <img
-                    src="{{ url_for('static', filename=current_user.avatar_path) if current_user.avatar_path else 'https://ui-avatars.com/api/?name=' + (current_user.username | urlencode) + '&size=70&background=667eea&color=fff' }}"
-                    alt="{{ current_user.username }}"
-                    style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 3px solid #667eea;"
-                />
-                <p id="project-description">
-                    You are logged in as <strong>{{ current_user.username }}</strong>.
-                </p>
-            </div>
-
-            <div id="action-buttons">
-                <div class="top-buttons" style="flex-direction: column; align-items: center;">
-                    <a class="btn success" style="width: 200px; text-align: center;" href="{{ url_for('dashboard') }}">Dashboard</a>
-                    <a class="btn" style="width: 200px; text-align: center;" href="{{ url_for('players') }}">Players</a>
-                    <a class="btn profile-btn" style="width: 200px; text-align: center;" href="{{ url_for('profile') }}">Profile</a>
-                    <a class="btn secondary" style="width: 200px; text-align: center;" href="{{ url_for('logout') }}">Logout</a>
-                </div>
-            </div>
-        {% else %}
-            <p id="project-description">
-                Explore the page by logging in below or creating a new account
-            </p>
-
-            <div id="action-buttons">
-                <div class="top-buttons">
-                    <a class="btn" href="{{ url_for('login') }}">Login</a>
-                    <a class="btn success" href="{{ url_for('register') }}">Sign Up</a>
-                </div>
-
-                <div class="bottom-button">
-                    <a class="btn secondary" href="#features">Learn More</a>
-                </div>
-            </div>
-        {% endif %}
-
-        <div class="features" id="features" style="background: #1f2937; border-radius: 10px; padding: 20px; margin-top: 20px;">
-            <h2 style="color: white;">Features</h2>
-            <ul id="features-list">
-                <li>Track game accounts across multiple games</li>
-                <li>View player profiles and rankings</li>
-                <li>Comment on other players' profiles</li>
-                <li>Upload a profile picture</li>
-                <li>Manage account rank, level and region</li>
-            </ul>
+    <!-- Vault opening loader -->
+    <div id="vault-loader">
+        <div class="vault-door vault-door-left">
+            <span class="door-rivet r1"></span>
+            <span class="door-rivet r2"></span>
+            <span class="door-rivet r3"></span>
+            <span class="door-rivet r4"></span>
         </div>
+        <div class="vault-door vault-door-right">
+            <span class="door-rivet r1"></span>
+            <span class="door-rivet r2"></span>
+            <span class="door-rivet r3"></span>
+            <span class="door-rivet r4"></span>
+        </div>
+
+        <div class="loader-title">Game<span class="accent">Vault</span></div>
+
+        <div class="dial-wrap">
+            <div class="dial-indicator"></div>
+            <svg class="dial-body" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <radialGradient id="dialMetal" cx="50%" cy="35%">
+                        <stop offset="0%"  stop-color="#94a3b8"/>
+                        <stop offset="60%" stop-color="#475569"/>
+                        <stop offset="100%" stop-color="#1e293b"/>
+                    </radialGradient>
+                </defs>
+                <circle cx="100" cy="100" r="92" fill="url(#dialMetal)" stroke="#0f172a" stroke-width="6"/>
+                <circle cx="100" cy="100" r="82" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="1"/>
+                <g stroke="#fbbf24" stroke-linecap="round" fill="none">
+                    <line x1="100" y1="20" x2="100" y2="36" stroke-width="4"/>
+                    <line transform="rotate(30 100 100)"  x1="100" y1="20" x2="100" y2="30" stroke-width="2.5"/>
+                    <line transform="rotate(60 100 100)"  x1="100" y1="20" x2="100" y2="30" stroke-width="2.5"/>
+                    <line transform="rotate(90 100 100)"  x1="100" y1="20" x2="100" y2="36" stroke-width="4"/>
+                    <line transform="rotate(120 100 100)" x1="100" y1="20" x2="100" y2="30" stroke-width="2.5"/>
+                    <line transform="rotate(150 100 100)" x1="100" y1="20" x2="100" y2="30" stroke-width="2.5"/>
+                    <line transform="rotate(180 100 100)" x1="100" y1="20" x2="100" y2="36" stroke-width="4"/>
+                    <line transform="rotate(210 100 100)" x1="100" y1="20" x2="100" y2="30" stroke-width="2.5"/>
+                    <line transform="rotate(240 100 100)" x1="100" y1="20" x2="100" y2="30" stroke-width="2.5"/>
+                    <line transform="rotate(270 100 100)" x1="100" y1="20" x2="100" y2="36" stroke-width="4"/>
+                    <line transform="rotate(300 100 100)" x1="100" y1="20" x2="100" y2="30" stroke-width="2.5"/>
+                    <line transform="rotate(330 100 100)" x1="100" y1="20" x2="100" y2="30" stroke-width="2.5"/>
+                </g>
+                <rect x="98" y="36" width="4" height="52" fill="#fbbf24" rx="2"/>
+                <circle cx="100" cy="100" r="24" fill="#0f172a" stroke="#fbbf24" stroke-width="2"/>
+                <circle cx="100" cy="100" r="6" fill="#fbbf24"/>
+            </svg>
+        </div>
+
+        <div class="unlock-flash" id="unlock-flash"></div>
+        <div class="loader-hint">Unlocking… click to skip</div>
     </div>
 
+    <nav class="topbar">
+        <a href="{{ url_for('mainmenu') }}" class="brand">
+            <span class="brand-mark">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="3"/><path d="M7 12h4"/><path d="M9 10v4"/><circle cx="16" cy="11" r="1.2" fill="currentColor"/><circle cx="18" cy="13" r="1.2" fill="currentColor"/></svg>
+            </span>
+            GameVault
+        </a>
+        {% if not current_user %}
+            <div class="topbar-actions">
+                <a href="{{ url_for('login') }}" class="btn btn-ghost">Sign in</a>
+                <a href="{{ url_for('register') }}" class="btn btn-primary" style="min-width: auto; padding: 10px 18px;">Get started</a>
+            </div>
+        {% endif %}
+    </nav>
+
+    <main class="hero">
+        <div class="hero-card">
+            <div class="rivet tl"></div>
+            <div class="rivet tr"></div>
+            <div class="rivet bl"></div>
+            <div class="rivet br"></div>
+
+            <div class="badge-pill">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2 L13.5 8.5 L20 10 L13.5 11.5 L12 18 L10.5 11.5 L4 10 L10.5 8.5 Z"/></svg>
+                Game Account Manager
+            </div>
+
+            <h1>Welcome to <span class="accent">GameVault</span></h1>
+            <p class="tagline">All your game accounts, ranks, and notes — organized in one beautiful dashboard.</p>
+
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for message in messages %}
+                            <div>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                                <span>{{ message }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            {% if current_user %}
+                <div class="user-card">
+                    <img
+                        src="{{ url_for('static', filename=current_user.avatar_path) if current_user.avatar_path else 'https://ui-avatars.com/api/?name=' + (current_user.username | urlencode) + '&size=120&background=4f46e5&color=fff&bold=true' }}"
+                        alt="{{ current_user.username }}"
+                    />
+                    <div class="user-card-text">
+                        <small>Signed in as</small>
+                        <strong>{{ current_user.username }}</strong>
+                    </div>
+                </div>
+
+                {% macro wheel_body() %}
+                    <svg class="wheel-body" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <circle cx="50" cy="50" r="46" fill="url(#wheelMetalGrad)" stroke="#0f172a" stroke-width="3"/>
+                        <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="0.5"/>
+                        <g stroke="#fbbf24" stroke-linecap="round" fill="none">
+                            <line x1="50" y1="8" x2="50" y2="16" stroke-width="2.5"/>
+                            <line transform="rotate(45 50 50)"  x1="50" y1="8" x2="50" y2="14" stroke-width="2"/>
+                            <line transform="rotate(90 50 50)"  x1="50" y1="8" x2="50" y2="16" stroke-width="2.5"/>
+                            <line transform="rotate(135 50 50)" x1="50" y1="8" x2="50" y2="14" stroke-width="2"/>
+                            <line transform="rotate(180 50 50)" x1="50" y1="8" x2="50" y2="16" stroke-width="2.5"/>
+                            <line transform="rotate(225 50 50)" x1="50" y1="8" x2="50" y2="14" stroke-width="2"/>
+                            <line transform="rotate(270 50 50)" x1="50" y1="8" x2="50" y2="16" stroke-width="2.5"/>
+                            <line transform="rotate(315 50 50)" x1="50" y1="8" x2="50" y2="14" stroke-width="2"/>
+                        </g>
+                        <circle cx="50" cy="50" r="24" fill="#0f172a" stroke="#fbbf24" stroke-width="1.5"/>
+                    </svg>
+                {% endmacro %}
+
+                <div class="wheel-grid">
+                    <a class="action-wheel" href="{{ url_for('dashboard') }}">
+                        <div class="wheel-spinner">
+                            {{ wheel_body() }}
+                            <svg class="wheel-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+                        </div>
+                        <span class="wheel-label">Dashboard</span>
+                    </a>
+
+                    <a class="action-wheel" href="{{ url_for('players') }}">
+                        <div class="wheel-spinner">
+                            {{ wheel_body() }}
+                            <svg class="wheel-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        </div>
+                        <span class="wheel-label">Players</span>
+                    </a>
+
+                    <a class="action-wheel" href="{{ url_for('profile') }}">
+                        <div class="wheel-spinner">
+                            {{ wheel_body() }}
+                            <svg class="wheel-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        </div>
+                        <span class="wheel-label">Profile</span>
+                    </a>
+
+                    <a class="action-wheel danger" href="{{ url_for('logout') }}">
+                        <div class="wheel-spinner">
+                            {{ wheel_body() }}
+                            <svg class="wheel-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                        </div>
+                        <span class="wheel-label">Logout</span>
+                    </a>
+                </div>
+            {% else %}
+                <p class="tagline" style="margin-bottom: 20px;">Log in or create an account to get started.</p>
+                <div class="btn-row">
+                    <a class="btn btn-primary" href="{{ url_for('login') }}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                        Login
+                    </a>
+                    <a class="btn btn-success" href="{{ url_for('register') }}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                        Sign Up
+                    </a>
+                    <a class="btn btn-secondary" href="#features">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        Learn More
+                    </a>
+                </div>
+            {% endif %}
+
+            <div class="features" id="features">
+                <h2>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    Features
+                </h2>
+                <ul>
+                    <li>Track game accounts across multiple games</li>
+                    <li>View player profiles and rankings</li>
+                    <li>Comment on other players' profiles</li>
+                    <li>Upload a profile picture</li>
+                    <li>Manage account rank, level and region</li>
+                    <li>Direct messaging with other players</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
     <footer>
-        &copy; <span id="year"></span> GameVault
+        &copy; <span id="year"></span> GameVault — All your game accounts, in one place.
     </footer>
+
+    <!-- Key cursor -->
+    <div id="key-cursor" aria-hidden="true">
+        <svg viewBox="0 0 80 30" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="keyGold" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%"   stop-color="#fef3c7"/>
+                    <stop offset="40%"  stop-color="#fbbf24"/>
+                    <stop offset="100%" stop-color="#b45309"/>
+                </linearGradient>
+            </defs>
+            <circle cx="14" cy="15" r="12" fill="url(#keyGold)" stroke="#78350f" stroke-width="1.2"/>
+            <circle cx="14" cy="15" r="5" fill="#0f172a"/>
+            <rect x="24" y="12" width="44" height="6" fill="url(#keyGold)" stroke="#78350f" stroke-width="0.8"/>
+            <rect x="56" y="18" width="6" height="7" fill="url(#keyGold)" stroke="#78350f" stroke-width="0.8"/>
+            <rect x="64" y="18" width="3" height="4" fill="url(#keyGold)" stroke="#78350f" stroke-width="0.8"/>
+            <rect x="68" y="13" width="6" height="4" rx="1" fill="url(#keyGold)" stroke="#78350f" stroke-width="0.8"/>
+            <ellipse cx="11" cy="9" rx="4" ry="2.5" fill="white" opacity="0.55"/>
+            <rect x="26" y="13" width="38" height="1.6" fill="white" opacity="0.45" rx="0.5"/>
+        </svg>
+    </div>
 
     <script>
         document.getElementById('year').textContent = new Date().getFullYear();
 
-        window.addEventListener('load', function() {
-            const container = document.querySelector('.container');
-            container.style.opacity = '0';
-            container.style.transform = 'translateY(20px)';
+        // ===== Vault navigation transition =====
+        (function () {
+            const loader = document.getElementById('vault-loader');
+            if (!loader) return;
 
-            setTimeout(() => {
-                container.style.transition = 'opacity 0.5s, transform 0.5s';
-                container.style.opacity = '1';
-                container.style.transform = 'translateY(0)';
-            }, 100);
-        });
+            let pendingTarget = null;
+            let navigated = false;
+
+            function navigate() {
+                if (navigated || !pendingTarget) return;
+                navigated = true;
+                window.location.href = pendingTarget;
+            }
+
+            function startTransition(targetUrl) {
+                if (pendingTarget) return;
+                pendingTarget = targetUrl;
+
+                loader.classList.add('active');
+
+                // Flash at end of dial spin (0.25s delay + 1.4s duration)
+                setTimeout(function () {
+                    const flash = document.getElementById('unlock-flash');
+                    if (flash) flash.classList.add('flash');
+                }, 1500);
+
+                // Open doors
+                setTimeout(function () {
+                    loader.classList.add('opened');
+                }, 1700);
+
+                // Navigate while doors are opening
+                setTimeout(navigate, 2000);
+            }
+
+            // Click loader to skip ahead
+            loader.addEventListener('click', navigate);
+
+            // Intercept all internal navigation links
+            document.querySelectorAll('a[href]').forEach(function (link) {
+                const rawHref = link.getAttribute('href');
+                if (!rawHref) return;
+                if (rawHref.startsWith('#') || rawHref.startsWith('mailto:') || rawHref.startsWith('javascript:')) return;
+
+                let url;
+                try { url = new URL(link.href); } catch (e) { return; }
+                if (url.origin !== window.location.origin) return;
+                if (url.pathname === window.location.pathname && url.search === window.location.search) return;
+
+                link.addEventListener('click', function (e) {
+                    if (e.metaKey || e.ctrlKey || e.shiftKey) return; // let cmd/ctrl-click open new tab
+                    e.preventDefault();
+                    startTransition(link.href);
+                });
+            });
+        })();
+
+        (function () {
+            const key = document.getElementById('key-cursor');
+            if (!key) return;
+
+            // Skip on touch devices
+            if (window.matchMedia && window.matchMedia('(hover: none)').matches) return;
+
+            const ease = 0.18;
+            let mouseX = window.innerWidth / 2;
+            let mouseY = window.innerHeight / 2;
+            let keyX = mouseX;
+            let keyY = mouseY;
+            let lastSparkleAt = 0;
+
+            document.addEventListener('mousemove', function (e) {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+
+            document.querySelectorAll('a, button').forEach(function (el) {
+                el.addEventListener('mouseenter', function () { document.body.classList.add('is-hovering'); });
+                el.addEventListener('mouseleave', function () { document.body.classList.remove('is-hovering'); });
+            });
+
+            function spawnSparkle(x, y) {
+                const s = document.createElement('div');
+                s.className = 'sparkle';
+                s.style.left = (x + (Math.random() * 16 - 8)) + 'px';
+                s.style.top  = (y + (Math.random() * 16 - 8)) + 'px';
+                document.body.appendChild(s);
+                setTimeout(function () { s.remove(); }, 700);
+            }
+
+            function tick() {
+                const prevX = keyX;
+                const prevY = keyY;
+                keyX += (mouseX - keyX) * ease;
+                keyY += (mouseY - keyY) * ease;
+
+                const dx = keyX - prevX;
+                const dy = keyY - prevY;
+                const speed = Math.hypot(dx, dy);
+
+                let angle = 0;
+                if (speed > 0.4) {
+                    angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                } else {
+                    angle = (parseFloat(key.dataset.lastAngle) || 0) * 0.92;
+                }
+                key.dataset.lastAngle = angle;
+
+                key.style.transform = 'translate(' + (keyX - 14) + 'px, ' + (keyY - 11) + 'px) rotate(' + angle + 'deg)';
+
+                const now = performance.now();
+                if (speed > 1.2 && now - lastSparkleAt > 60) {
+                    spawnSparkle(keyX, keyY);
+                    lastSparkleAt = now;
+                }
+                requestAnimationFrame(tick);
+            }
+            requestAnimationFrame(tick);
+        })();
     </script>
 </body>
 </html>

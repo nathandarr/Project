@@ -1,341 +1,125 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{{ profile_user.username }} - Public Profile</title>
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+{% extends "base.html" %}
 
-        body {
-            margin: 0;
-            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            background: #f4f6fb;
-            color: #222;
-        }
+{% block title %}{{ profile_user.username }} - Public Profile{% endblock %}
 
-        header {
-            background: #1f2937;
-            color: white;
-            padding: 20px 32px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/public_profile.css') }}">
+{% endblock %}
 
-        header h1 {
-            margin: 0;
-            font-size: 28px;
-        }
-
-        header p {
-            margin: 4px 0 0;
-            font-size: 14px;
-            color: #d1d5db;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .header-btn {
-            display: inline-block;
-            padding: 10px 16px;
-            border-radius: 10px;
-            text-decoration: none;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-        }
-
-        .home-btn {
-            background: #2563eb;
-            color: white;
-        }
-
-        .logout-btn {
-            background: #ef4444;
-            color: white;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 14px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-            padding: 24px;
-            margin-bottom: 24px;
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 16px;
-        }
-
-        .stat-box {
-            background: #eff6ff;
-            border-radius: 12px;
-            padding: 18px;
-        }
-
-        .stat-box h3 {
-            margin: 0 0 6px;
-            font-size: 15px;
-            color: #374151;
-        }
-
-        .stat-box p {
-            margin: 0;
-            font-size: 28px;
-            font-weight: bold;
-            color: #1d4ed8;
-        }
-
-        .flash-messages {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .flash-message {
-            padding: 12px 14px;
-            border-radius: 10px;
-            font-weight: 500;
-        }
-
-        .flash-success {
-            background: #e8f8ee;
-            color: #1f7a3f;
-            border: 1px solid #b7e4c7;
-        }
-
-        .flash-danger {
-            background: #fff1f1;
-            color: #b02a37;
-            border: 1px solid #f0b6b6;
-        }
-
-        .flash-warning {
-            background: #fff8e6;
-            color: #9a6700;
-            border: 1px solid #f7d58b;
-        }
-
-        .flash-info {
-            background: #eef4ff;
-            color: #1d4ed8;
-            border: 1px solid #c7d8ff;
-        }
-
-        h2 {
-            margin-top: 0;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 16px;
-        }
-
-        thead {
-            background: #1f2937;
-            color: white;
-        }
-
-        th,
-        td {
-            text-align: left;
-            padding: 14px 12px;
-            border-bottom: 1px solid #e5e7eb;
-            vertical-align: top;
-        }
-
-        tbody tr:hover {
-            background: #f9fafb;
-        }
-
-        .comment-form {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        textarea {
-            width: 100%;
-            min-height: 120px;
-            padding: 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 10px;
-            resize: vertical;
-            font-size: 14px;
-        }
-
-        textarea:focus {
-            outline: none;
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 10px 16px;
-            border-radius: 10px;
-            text-decoration: none;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-        }
-
-        .primary-btn {
-            background: #2563eb;
-            color: white;
-        }
-
-        .danger-btn {
-            background: #ef4444;
-            color: white;
-        }
-
-        .comment-list {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .comment-item {
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 16px;
-            background: #fafafa;
-        }
-
-        .comment-meta {
-            display: flex;
-            justify-content: space-between;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 8px;
-            color: #555;
-            font-size: 14px;
-        }
-
-        .comment-body {
-            white-space: pre-wrap;
-            line-height: 1.5;
-        }
-
-        .empty-state {
-            text-align: center;
-            color: #666;
-            padding: 24px 8px;
-        }
-
-        form.inline-form {
-            margin-top: 12px;
-        }
-
-        @media (max-width: 900px) {
-            table,
-            thead,
-            tbody,
-            th,
-            td,
-            tr {
-                display: block;
-            }
-
-            thead {
-                display: none;
-            }
-
-            tbody tr {
-                margin-bottom: 16px;
-                border: 1px solid #e5e7eb;
-                border-radius: 12px;
-                overflow: hidden;
-                background: white;
-            }
-
-            td {
-                display: flex;
-                justify-content: space-between;
-                gap: 16px;
-                padding: 12px;
-            }
-
-            td::before {
-                content: attr(data-label);
-                font-weight: bold;
-                color: #374151;
-                min-width: 110px;
-            }
-        }
-    </style>
-</head>
-<body>
-<header>
-    <div style="display: flex; align-items: center; gap: 16px;">
-        <img
-            src="{{ url_for('static', filename=profile_user.avatar_path) if profile_user.avatar_path else 'https://ui-avatars.com/api/?name=' + (profile_user.username | urlencode) + '&size=70&background=667eea&color=fff' }}"
+{% block header_user %}
+    <img
+            src="{{ url_for('static', filename=profile_user.avatar_path) if profile_user.avatar_path else 'https://ui-avatars.com/api/?name=' + (profile_user.username | urlencode) + '&size=120&background=4f46e5&color=fff&bold=true' }}"
             alt="{{ profile_user.username }}"
-            style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 3px solid white;"
         />
         <div>
             <h1>{{ profile_user.username }}'s Profile</h1>
-        <p>
-            {% if profile_user.full_name %}
-                {{ profile_user.full_name }}
-            {% else %}
-                Public player profile
-            {% endif %}
-        </p>
+            <p>
+                {% if profile_user.full_name %}
+                    {{ profile_user.full_name }}
+                {% else %}
+                    Public player profile
+                {% endif %}
+            </p>
         </div>
-    </div>
+{% endblock %}
 
-    <div class="header-actions">
-        <a href="{{ url_for('mainmenu') }}" class="header-btn home-btn">Home</a>
-        <a href="{{ url_for('players') }}" class="header-btn home-btn">Players</a>
-        <a href="{{ url_for('dashboard') }}" class="header-btn home-btn">Dashboard</a>
-        <a href="{{ url_for('logout') }}" class="header-btn logout-btn">Logout</a>
-    </div>
-</header>
+{% block header_actions %}
+    {% if viewer.id != profile_user.id %}
+            <button
+                type="button"
+                class="header-btn message-btn"
+                data-chat-with-id="{{ profile_user.id }}"
+                data-chat-with-username="{{ profile_user.username }}"
+            >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                Message
+            </button>
+        {% endif %}
+        <a href="{{ url_for('mainmenu') }}" class="header-btn nav-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            Home
+        </a>
+        <a href="{{ url_for('players') }}" class="header-btn nav-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Players
+        </a>
+        <a href="{{ url_for('dashboard') }}" class="header-btn nav-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+            Dashboard
+        </a>
+        <a href="{{ url_for('logout') }}" class="header-btn logout-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Logout
+        </a>
+{% endblock %}
 
-<div class="container">
+{% block content %}
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            <section class="card">
-                <div class="flash-messages">
-                    {% for category, message in messages %}
-                        <div class="flash-message flash-{{ category }}">{{ message }}</div>
-                    {% endfor %}
-                </div>
-            </section>
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}" role="alert">
+                        {% if category == 'success' %}
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        {% elif category == 'danger' %}
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                        {% elif category == 'warning' %}
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        {% else %}
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        {% endif %}
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            </div>
         {% endif %}
     {% endwith %}
 
-    <section class="card">
-        <div class="stats">
-            <div class="stat-box">
+    <section class="profile-hero">
+        <div class="profile-banner"></div>
+        <div class="profile-body">
+            <img
+                class="profile-avatar"
+                src="{{ url_for('static', filename=profile_user.avatar_path) if profile_user.avatar_path else 'https://ui-avatars.com/api/?name=' + (profile_user.username | urlencode) + '&size=240&background=4f46e5&color=fff&bold=true' }}"
+                alt="{{ profile_user.username }}"
+            />
+            <div class="profile-info">
+                <h2>{{ profile_user.username }}</h2>
+                <p>
+                    {% if profile_user.full_name %}
+                        {{ profile_user.full_name }}
+                    {% else %}
+                        Public player profile
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="stats">
+        <div class="stat-box">
+            <div class="stat-icon indigo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M7 12h4"/><path d="M9 10v4"/><circle cx="16" cy="11" r="1"/><circle cx="18" cy="13" r="1"/></svg>
+            </div>
+            <div class="stat-content">
                 <h3>Total Accounts</h3>
                 <p>{{ total_accounts }}</p>
             </div>
-            <div class="stat-box">
+        </div>
+        <div class="stat-box">
+            <div class="stat-icon violet">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <div class="stat-content">
                 <h3>Total Games</h3>
                 <p>{{ total_games }}</p>
             </div>
-            <div class="stat-box">
+        </div>
+        <div class="stat-box">
+            <div class="stat-icon amber">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+            </div>
+            <div class="stat-content">
                 <h3>Highest Level</h3>
                 <p>{{ highest_level }}</p>
             </div>
@@ -343,93 +127,146 @@
     </section>
 
     <section class="card">
-        <h2>Game Accounts</h2>
+        <div class="card-header">
+            <div>
+                <h2 class="card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                    Game Accounts
+                </h2>
+                <p class="card-subtitle">{{ accounts|length }} account{{ '' if accounts|length == 1 else 's' }} listed publicly.</p>
+            </div>
+        </div>
 
         {% if accounts %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Game</th>
-                        <th>Account Name</th>
-                        <th>Region</th>
-                        <th>Level</th>
-                        <th>Rank</th>
-                        <th>Status</th>
-                        <th>Notes</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for account in accounts %}
+            <div class="table-wrap">
+                <table>
+                    <thead>
                         <tr>
-                            <td data-label="Game">{{ account.game_name }}</td>
-                            <td data-label="Account Name">{{ account.account_name }}</td>
-                            <td data-label="Region">{{ account.region }}</td>
-                            <td data-label="Level">{{ account.level }}</td>
-                            <td data-label="Rank">{{ account.rank }}</td>
-                            <td data-label="Status">{{ account.status }}</td>
-                            <td data-label="Notes">{{ account.notes or "" }}</td>
+                            <th>Game</th>
+                            <th>Account Name</th>
+                            <th>Region</th>
+                            <th>Level</th>
+                            <th>Rank</th>
+                            <th>Status</th>
+                            <th>Tags</th>
+                            <th>Notes</th>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {% for account in accounts %}
+                            <tr>
+                                <td data-label="Game" class="cell-game">{{ account.game_name }}</td>
+                                <td data-label="Account">{{ account.account_name }}</td>
+                                <td data-label="Region"><span class="region-tag">{{ account.region }}</span></td>
+                                <td data-label="Level" class="cell-mono">{{ account.level }}</td>
+                                <td data-label="Rank">{{ account.rank }}</td>
+                                <td data-label="Status">
+                                    <span class="badge {{ 'badge-active' if account.status == 'Active' else 'badge-inactive' }}">
+                                        {{ account.status }}
+                                    </span>
+                                </td>
+                                <td data-label="Tags">
+                                    <div class="cell-tags">
+                                        {% for tag in account.tag_list %}
+                                            <span class="tag-pill tag-pill-{{ tag | replace(' ', '-') | lower }}">{{ tag }}</span>
+                                        {% else %}
+                                            <span class="cell-empty">—</span>
+                                        {% endfor %}
+                                    </div>
+                                </td>
+                                <td data-label="Notes" class="cell-notes" title="{{ account.notes or '' }}">{{ account.notes or "—" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         {% else %}
-            <div class="empty-state">This user has not added any game accounts yet.</div>
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M7 12h4"/><path d="M9 10v4"/><circle cx="16" cy="11" r="1"/><circle cx="18" cy="13" r="1"/></svg>
+                <h3>No game accounts yet</h3>
+                <p>This user hasn't shared any game accounts.</p>
+            </div>
         {% endif %}
     </section>
 
     <section class="card">
-        <h2>Tips & Comments</h2>
+        <div class="card-header">
+            <div>
+                <h2 class="card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    Leave a Tip
+                </h2>
+                <p class="card-subtitle">Share strategy advice or a friendly note.</p>
+            </div>
+        </div>
 
         {% if viewer.id != profile_user.id %}
             <form class="comment-form" method="POST" action="{{ url_for('add_profile_comment', user_id=profile_user.id) }}">
                 <textarea
                     name="body"
                     maxlength="500"
-                    placeholder="Write a tip, strategy suggestion, or friendly comment..."
+                    placeholder="Write a tip, strategy suggestion, or friendly comment... (max 500 chars)"
                     required
                 ></textarea>
-                <button type="submit" class="btn primary-btn">Post Comment</button>
+                <button type="submit" class="btn primary-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    Post Comment
+                </button>
             </form>
         {% else %}
-            <div class="empty-state">You cannot comment on your own public profile.</div>
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <h3>This is your profile</h3>
+                <p>You can't comment on your own public profile.</p>
+            </div>
         {% endif %}
     </section>
 
     <section class="card">
-        <h2>Community Comments</h2>
+        <div class="card-header">
+            <div>
+                <h2 class="card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                    Community Comments
+                </h2>
+                <p class="card-subtitle">{{ comments|length }} comment{{ '' if comments|length == 1 else 's' }} from the community.</p>
+            </div>
+        </div>
 
         {% if comments %}
             <div class="comment-list">
                 {% for comment in comments %}
                     <div class="comment-item">
                         <div class="comment-meta">
-                            <div style="display: flex; align-items: center; gap: 10px;">
+                            <div class="comment-author">
                                 <img
-                                    src="{{ url_for('static', filename=comment.author.avatar_path) if comment.author.avatar_path else 'https://ui-avatars.com/api/?name=' + (comment.author.username | urlencode) + '&size=36&background=667eea&color=fff' }}"
+                                    src="{{ url_for('static', filename=comment.author.avatar_path) if comment.author.avatar_path else 'https://ui-avatars.com/api/?name=' + (comment.author.username | urlencode) + '&size=72&background=4f46e5&color=fff&bold=true' }}"
                                     alt="{{ comment.author.username }}"
-                                    style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid #e5e7eb;"
                                 />
                                 <strong>{{ comment.author.username }}</strong>
                             </div>
-                            <div>
-                                {{ comment.created_at.strftime("%d %b %Y %I:%M %p") }}
-                            </div>
+                            <div class="comment-date">{{ comment.created_at.strftime("%d %b %Y · %I:%M %p") }}</div>
                         </div>
 
                         <div class="comment-body">{{ comment.body }}</div>
 
                         {% if viewer.id == comment.author_id or viewer.id == comment.profile_user_id %}
-                            <form class="inline-form" method="POST" action="{{ url_for('delete_profile_comment', comment_id=comment.id) }}">
-                                <button type="submit" class="btn danger-btn">Delete Comment</button>
+                            <form class="inline-form" method="POST" action="{{ url_for('delete_profile_comment', comment_id=comment.id) }}" onsubmit="return confirm('Delete this comment?');">
+                                <button type="submit" class="btn danger-btn">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+                                    Delete
+                                </button>
                             </form>
                         {% endif %}
                     </div>
                 {% endfor %}
             </div>
         {% else %}
-            <div class="empty-state">No comments yet. Be the first to leave a tip.</div>
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <h3>No comments yet</h3>
+                <p>Be the first to leave a tip.</p>
+            </div>
         {% endif %}
     </section>
-</div>
-</body>
-</html>
+{% endblock %}
