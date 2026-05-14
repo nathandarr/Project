@@ -474,3 +474,31 @@ textarea:focus {
 body {
     overflow-x: hidden;
 }
+
+.comment-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+
+.vote-btn {
+    background: var(--surface);
+    color: var(--text-subtle);
+    border-color: var(--border-strong);
+    padding: 7px 12px;
+    font-size: 13px;
+    transition: all 0.18s ease;
+}
+
+.upvote-btn:hover, .upvote-btn.active {
+    background: #f0fdf4;
+    color: #16a34a;
+    border-color: #bbf7d0;
+}
+
+.downvote-btn:hover, .downvote-btn.active {
+    background: #fff1f5;
+    color: #e11d48;
+    border-color: #fecdd3;
+}

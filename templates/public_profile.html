@@ -257,14 +257,40 @@
 
                         <div class="comment-body">{{ comment.body }}</div>
 
-                        {% if viewer.id == comment.author_id or viewer.id == comment.profile_user_id %}
-                            <form class="inline-form" method="POST" action="{{ url_for('delete_profile_comment', comment_id=comment.id) }}" onsubmit="return confirm('Delete this comment?');">
-                                <button type="submit" class="btn danger-btn">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
-                                    Delete
-                                </button>
-                            </form>
-                        {% endif %}
+                        <div class="comment-actions">
+                            {% set upvotes = comment.id | get_upvotes %}
+                            {% set downvotes = comment.id | get_downvotes %}
+                            {% set my_vote = viewer.id | user_vote(comment.id) %}
+
+                            <button
+                                type="button"
+                                class="btn vote-btn upvote-btn {{ 'active' if my_vote == 'up' }}"
+                                data-comment-id="{{ comment.id }}"
+                                data-vote-type="up"
+                            >
+                                <svg viewBox="0 0 24 24" fill="{{ 'currentColor' if my_vote == 'up' else 'none' }}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+                                <span class="upvote-count">{{ upvotes }}</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="btn vote-btn downvote-btn {{ 'active' if my_vote == 'down' }}"
+                                data-comment-id="{{ comment.id }}"
+                                data-vote-type="down"
+                            >
+                                <svg viewBox="0 0 24 24" fill="{{ 'currentColor' if my_vote == 'down' else 'none' }}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>
+                                <span class="downvote-count">{{ downvotes }}</span>
+                            </button>
+
+                            {% if viewer.id == comment.author_id or viewer.id == comment.profile_user_id %}
+                                <form class="inline-form" method="POST" action="{{ url_for('delete_profile_comment', comment_id=comment.id) }}" onsubmit="return confirm('Delete this comment?');">
+                                    <button type="submit" class="btn danger-btn">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+                                        Delete
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
                     </div>
                 {% endfor %}
             </div>
@@ -276,4 +302,43 @@
             </div>
         {% endif %}
     </section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.querySelectorAll('.vote-btn').forEach(btn => {
+    btn.addEventListener('click', async function() {
+        const commentId = this.dataset.commentId;
+        const voteType = this.dataset.voteType;
+
+        const response = await fetch(`/comments/${commentId}/vote`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ vote_type: voteType })
+        });
+
+        const data = await response.json();
+
+        const item = this.closest('.comment-item');
+        const upBtn = item.querySelector('.upvote-btn');
+        const downBtn = item.querySelector('.downvote-btn');
+
+        upBtn.querySelector('.upvote-count').textContent = data.upvotes;
+        downBtn.querySelector('.downvote-count').textContent = data.downvotes;
+
+        upBtn.classList.remove('active');
+        downBtn.classList.remove('active');
+        upBtn.querySelector('svg').setAttribute('fill', 'none');
+        downBtn.querySelector('svg').setAttribute('fill', 'none');
+
+        if (data.user_vote === 'up') {
+            upBtn.classList.add('active');
+            upBtn.querySelector('svg').setAttribute('fill', 'currentColor');
+        } else if (data.user_vote === 'down') {
+            downBtn.classList.add('active');
+            downBtn.querySelector('svg').setAttribute('fill', 'currentColor');
+        }
+    });
+});
+</script>
 {% endblock %}

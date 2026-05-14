@@ -106,3 +106,14 @@ class Message(db.Model):
 
     sender: Mapped["User"] = relationship("User", foreign_keys=[sender_id])
     receiver: Mapped["User"] = relationship("User", foreign_keys=[receiver_id])
+
+class CommentLike(db.Model):
+    __tablename__ = "comment_likes"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    comment_id: Mapped[int] = mapped_column(ForeignKey("profile_comments.id"), nullable=False)
+    vote_type: Mapped[str] = mapped_column(String(10), nullable=False, default="up")
+
+    user: Mapped["User"] = relationship("User", foreign_keys=[user_id])
+    comment: Mapped["ProfileComment"] = relationship("ProfileComment", foreign_keys=[comment_id])
