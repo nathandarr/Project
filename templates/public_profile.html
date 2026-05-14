@@ -235,12 +235,20 @@
                 </h2>
                 <p class="card-subtitle">{{ comments|length }} comment{{ '' if comments|length == 1 else 's' }} from the community.</p>
             </div>
+            <div class="sort-buttons">
+                <button type="button" class="sort-btn active" data-sort="newest">Newest</button>
+                <button type="button" class="sort-btn" data-sort="oldest">Oldest</button>
+                <button type="button" class="sort-btn" data-sort="liked">Most Liked</button>
+            </div>
         </div>
 
         {% if comments %}
             <div class="comment-list">
                 {% for comment in comments %}
-                    <div class="comment-item">
+                    <div class="comment-item"
+                        data-created="{{ comment.created_at.timestamp() }}"
+                        data-upvotes="{{ comment.id | get_upvotes }}"
+                    >
                         <div class="comment-meta">
                             <div class="comment-author">
                                 <img
@@ -338,6 +346,36 @@ document.querySelectorAll('.vote-btn').forEach(btn => {
             downBtn.classList.add('active');
             downBtn.querySelector('svg').setAttribute('fill', 'currentColor');
         }
+
+        item.dataset.upvotes = data.upvotes;
+    });
+});
+
+function sortComments(sortType) {
+    const list = document.querySelector('.comment-list');
+    if (!list) return;
+
+    const comments = Array.from(list.querySelectorAll('.comment-item'));
+
+    comments.sort((a, b) => {
+        if (sortType === 'newest') {
+            return parseFloat(b.dataset.created) - parseFloat(a.dataset.created);
+        } else if (sortType === 'oldest') {
+            return parseFloat(a.dataset.created) - parseFloat(b.dataset.created);
+        } else if (sortType === 'liked') {
+            return parseInt(b.dataset.upvotes) - parseInt(a.dataset.upvotes);
+        }
+        return 0;
+    });
+
+    comments.forEach(comment => list.appendChild(comment));
+}
+
+document.querySelectorAll('.sort-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        sortComments(this.dataset.sort);
     });
 });
 </script>
