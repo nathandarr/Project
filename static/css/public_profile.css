@@ -29,7 +29,7 @@
             align-items: flex-end;
             gap: 20px;
             flex-wrap: wrap;
-            margin-top: -56px;
+            margin-top: -36px;
             position: relative;
         }
 
@@ -469,4 +469,8 @@ textarea:focus {
     letter-spacing: 0.05em;
     }
     .cell-notes { max-width: none; white-space: normal; text-align: right; }
+}
+
+body {
+    overflow-x: hidden;
 }
