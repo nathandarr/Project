@@ -254,3 +254,7 @@
     .lb-card { padding: 16px; }
     .lb-table { font-size: 12px; }
 }
+
+body {
+    overflow-x: hidden;
+}

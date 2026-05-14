@@ -54,6 +54,7 @@
             flex: 1;
             min-width: 220px;
             padding-bottom: 8px;
+            padding-top: 16px;
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
@@ -351,4 +352,8 @@ select {
     .avatar-img { width: 88px; height: 88px; }
     .avatar-info h2 { font-size: 20px; }
     .row, .phone-row { grid-template-columns: 1fr; }
+}
+
+body {
+    overflow-x: hidden;
 }

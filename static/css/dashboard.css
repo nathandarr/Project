@@ -425,3 +425,7 @@ tbody tr:hover {
     }
     .cell-notes { max-width: none; white-space: normal; text-align: right; }
 }
+
+body {
+    overflow-x: hidden;
+}
