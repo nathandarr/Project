@@ -78,6 +78,16 @@
             <h2>Full Rankings</h2>
         </div>
         {% if rows %}
+        <div class="search-bar">
+            <input
+                type="text"
+                id="leaderboardSearch"
+                placeholder="Search by player username..."
+                onkeyup="filterLeaderboard()"
+            />
+        </div>
+        {% endif %}
+        {% if rows %}
             <div class="admin-table-wrap">
                 <table class="admin-table lb-table">
                     <thead>
@@ -134,5 +144,36 @@
                 <a class="header-btn nav-btn" href="{{ url_for('dashboard') }}">Go to Dashboard</a>
             </div>
         {% endif %}
-    </section>
-{% endblock %}
+        <div id="noResults" style="display: none; text-align: center; padding: 48px 24px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; margin-top: 16px;">
+            <div style="font-size: 48px; margin-bottom: 16px;">🔍</div>
+            <h3 style="color: #f1f5f9; font-size: 18px; margin: 0 0 8px;">No players found</h3>
+            <p style="color: #cbd5e1; font-size: 14px; margin: 0;">No players match "<span id="searchTerm"></span>"</p>
+        </div>
+
+        <script>
+            function filterLeaderboard() {
+                const query = document.getElementById('leaderboardSearch').value.toLowerCase();
+                const rows = document.querySelectorAll('.lb-table tbody tr');
+                let visibleCount = 0;
+
+                rows.forEach(row => {
+                    const username = row.querySelector('.user-cell strong');
+                    if (username && username.textContent.toLowerCase().includes(query)) {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+
+                const emptyMsg = document.getElementById('noResults');
+                if (visibleCount === 0) {
+                    emptyMsg.style.display = 'block';
+                    document.getElementById('searchTerm').textContent = query;
+                } else {
+                    emptyMsg.style.display = 'none';
+                }
+            }
+        </script>
+        </section>
+    {% endblock %}

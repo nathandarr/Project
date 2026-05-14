@@ -258,3 +258,31 @@
 body {
     overflow-x: hidden;
 }
+
+.search-bar {
+    margin-bottom: 16px;
+}
+
+.search-bar input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    font-size: 15px;
+    outline: none;
+    background: rgba(255, 255, 255, 0.08);
+    color: white !important;
+    -webkit-text-fill-color: white !important;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.search-bar input::placeholder {
+    color: #cbd5e1;
+}
+
+.search-bar input:focus {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+    color: white !important;
+    -webkit-text-fill-color: white !important;
+}
