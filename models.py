@@ -89,9 +89,23 @@ class ProfileComment(db.Model):
 
     author_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     profile_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    parent_id: Mapped[int | None] = mapped_column(ForeignKey("profile_comments.id"), nullable=True)
 
     author: Mapped["User"] = relationship("User", foreign_keys=[author_id])
     profile_user: Mapped["User"] = relationship("User", foreign_keys=[profile_user_id])
+    replies: Mapped[list["ProfileComment"]] = relationship(
+        "ProfileComment",
+        foreign_keys="ProfileComment.parent_id",
+        back_populates="parent",
+        cascade="all, delete-orphan",
+        order_by="ProfileComment.created_at.asc()",
+    )
+    parent: Mapped["ProfileComment | None"] = relationship(
+        "ProfileComment",
+        foreign_keys="ProfileComment.parent_id",
+        back_populates="replies",
+        remote_side="ProfileComment.id",
+    )
 
 
 class Message(db.Model):

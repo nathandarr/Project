@@ -532,3 +532,66 @@ body {
     color: white;
     border-color: var(--primary);
 }
+
+.comment-reply {
+    border-left: 3px solid var(--primary);
+    background: var(--surface-muted);
+}
+
+.reply-form-wrap {
+    margin-top: 12px;
+}
+
+.reply-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.reply-form textarea {
+    min-height: 80px;
+}
+
+.secondary-btn {
+    background: var(--surface);
+    color: var(--text);
+    border-color: var(--border-strong);
+}
+
+.secondary-btn:hover {
+    background: var(--surface-muted);
+}
+
+.reply-toggle-btn {
+    background: var(--surface);
+    color: var(--text-subtle);
+    border-color: var(--border-strong);
+    padding: 7px 12px;
+    font-size: 13px;
+}
+
+.reply-toggle-btn:hover {
+    background: var(--primary-soft);
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.show-replies-btn {
+    background: var(--surface);
+    color: var(--text-subtle);
+    border-color: var(--border-strong);
+    padding: 7px 12px;
+    font-size: 13px;
+}
+
+.show-replies-btn:hover {
+    background: var(--surface-muted);
+    color: var(--text);
+}
+
+.replies-wrap {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}

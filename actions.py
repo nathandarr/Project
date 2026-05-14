@@ -242,3 +242,35 @@ def vote_comment(comment_id: int):
         "downvotes": downvotes,
         "user_vote": user_vote.vote_type if user_vote else None
     })
+
+@app.route("/comments/<int:comment_id>/reply", methods=["POST"])
+@login_required
+def reply_to_comment(comment_id: int):
+    viewer = get_current_user()
+    if viewer is None:
+        flash("Please log in to access that page.", "warning")
+        return redirect(url_for("login"))
+
+    parent_comment = db.session.get(ProfileComment, comment_id)
+    if parent_comment is None:
+        flash("Comment not found.", "danger")
+        return redirect(url_for("players"))
+
+    body, errors = validate_comment_body(request.form.get("body", ""))
+
+    if errors:
+        for error in errors:
+            flash(error, "danger")
+        return redirect(url_for("public_profile", user_id=parent_comment.profile_user_id))
+
+    reply = ProfileComment(
+        body=body,
+        author_id=viewer.id,
+        profile_user_id=parent_comment.profile_user_id,
+        parent_id=comment_id,
+    )
+
+    db.session.add(reply)
+    db.session.commit()
+
+    return redirect(url_for("public_profile", user_id=parent_comment.profile_user_id) + "#replies-" + str(comment_id))

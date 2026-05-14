@@ -119,6 +119,15 @@ def add_missing_game_account_columns() -> None:
     with db.engine.begin() as connection:
         connection.execute(text("ALTER TABLE game_accounts ADD COLUMN tags VARCHAR(200) NOT NULL DEFAULT ''"))
 
+def add_missing_comment_reply_column() -> None:
+    inspector = inspect(db.engine)
+    if "profile_comments" not in set(inspector.get_table_names()):
+        return
+    columns = {c["name"] for c in inspector.get_columns("profile_comments")}
+    if "parent_id" not in columns:
+        with db.engine.begin() as connection:
+            connection.execute(text("ALTER TABLE profile_comments ADD COLUMN parent_id INTEGER REFERENCES profile_comments(id)"))
+
 def add_missing_comment_likes_table() -> None:
     inspector = inspect(db.engine)
     existing_tables = set(inspector.get_table_names())
@@ -142,6 +151,7 @@ with app.app_context():
     db.create_all()
     add_missing_user_profile_columns()
     add_missing_game_account_columns()
+    add_missing_comment_reply_column()
     add_missing_comment_likes_table()
 
 
