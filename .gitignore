@@ -4,3 +4,6 @@ static/uploads/
 __pycache__/
 *.pyc
 .env
+
+# Claude Code
+.claude/settings.local.json

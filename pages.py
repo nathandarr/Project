@@ -16,6 +16,7 @@ from sqlalchemy import func, or_
 
 from app import (
     ALLOWED_TAGS,
+    GAMES,
     app,
     build_user_summary,
     db,
@@ -24,6 +25,44 @@ from app import (
     validate_user_profile_form,
 )
 from models import GameAccount, ProfileComment, User
+
+
+def _build_leaderboard_rows(game_name: str) -> list[dict]:
+    """Return ranked GameAccount rows for one game, highest tier first.
+
+    Sort key: rank tier (using GAMES[game].index as the numeric position) DESC,
+    then level DESC, then account_name ASC as the final tiebreaker.
+    Accounts whose `rank` value isn't in GAMES[game] (legacy / free-typed)
+    get tier -1 so they sink to the bottom rather than crashing the sort.
+    """
+    rank_order = GAMES.get(game_name, [])
+    rank_position = {rank: index for index, rank in enumerate(rank_order)}
+
+    accounts = (
+        GameAccount.query.filter_by(game_name=game_name)
+        .join(User, GameAccount.user_id == User.id)
+        .filter(User.is_banned.is_(False))
+        .all()
+    )
+
+    rows = []
+    for account in accounts:
+        tier = rank_position.get(account.rank, -1)
+        rows.append({
+            "account": account,
+            "user": account.user,
+            "tier": tier,
+            "tier_label": account.rank,
+        })
+
+    rows.sort(
+        key=lambda row: (-row["tier"], -row["account"].level, row["account"].account_name.lower())
+    )
+
+    for index, row in enumerate(rows, start=1):
+        row["position"] = index
+
+    return rows
 
 
 @app.route("/")
@@ -150,6 +189,7 @@ def dashboard():
         highest_level=highest_level,
         editing_account=editing_account,
         allowed_tags=ALLOWED_TAGS,
+        games=GAMES,
     )
 
 
@@ -272,4 +312,29 @@ def public_profile(user_id: int):
         total_accounts=total_accounts,
         total_games=total_games,
         highest_level=highest_level,
+    )
+
+
+@app.route("/leaderboard")
+@login_required
+def leaderboard():
+    viewer = get_current_user()
+    if viewer is None:
+        flash("Please log in to access that page.", "warning")
+        return redirect(url_for("login"))
+
+    games_list = list(GAMES.keys())
+    requested_game = request.args.get("game", "").strip()
+    selected_game = requested_game if requested_game in GAMES else games_list[0]
+
+    rows = _build_leaderboard_rows(selected_game)
+
+    return render_template(
+        "leaderboard.html",
+        viewer=viewer,
+        games=games_list,
+        selected_game=selected_game,
+        rank_tiers=GAMES[selected_game],
+        rows=rows,
+        total_entries=len(rows),
     )

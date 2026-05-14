@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Leaderboard - GameVault{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/leaderboard.css') }}">
+{% endblock %}
+
+{% block header_user %}
+    <img
+        src="{{ url_for('static', filename=viewer.avatar_path) if viewer.avatar_path else 'https://ui-avatars.com/api/?name=' + (viewer.username | urlencode) + '&size=120&background=4f46e5&color=fff&bold=true' }}"
+        alt="{{ viewer.username }}"
+    />
+    <div>
+        <h1>Leaderboard</h1>
+        <p>Top players by rank, sorted per game.</p>
+    </div>
+{% endblock %}
+
+{% block header_actions %}
+    <a href="{{ url_for('dashboard') }}" class="header-btn nav-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+        Dashboard
+    </a>
+    <a href="{{ url_for('players') }}" class="header-btn nav-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Players
+    </a>
+    <a href="{{ url_for('logout') }}" class="header-btn logout-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Logout
+    </a>
+{% endblock %}
+
+{% block content %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}" role="alert">
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <section class="lb-card lb-tabs-card">
+        <div class="lb-tabs" role="tablist" aria-label="Choose a game">
+            {% for game in games %}
+                <a
+                    href="{{ url_for('leaderboard', game=game) }}"
+                    class="lb-tab {{ 'is-active' if game == selected_game }}"
+                    role="tab"
+                    aria-selected="{{ 'true' if game == selected_game else 'false' }}"
+                >{{ game }}</a>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="lb-card lb-header-card">
+        <div class="lb-title">
+            <h2>{{ selected_game }}</h2>
+            <span class="count-pill">{{ total_entries }} entr{{ 'y' if total_entries == 1 else 'ies' }}</span>
+        </div>
+        {% if rank_tiers %}
+            <p class="lb-tier-line">
+                <span class="lb-tier-label">Tiers (low → high):</span>
+                {% for tier in rank_tiers %}
+                    <span class="lb-tier-chip">{{ tier }}</span>
+                {% endfor %}
+            </p>
+        {% endif %}
+    </section>
+
+    <section class="lb-card">
+        <div class="admin-card-head">
+            <h2>Full Rankings</h2>
+        </div>
+        {% if rows %}
+            <div class="admin-table-wrap">
+                <table class="admin-table lb-table">
+                    <thead>
+                        <tr>
+                            <th class="lb-col-pos">#</th>
+                            <th>Player</th>
+                            <th>Account</th>
+                            <th>Rank</th>
+                            <th>Lvl</th>
+                            <th>Region</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in rows %}
+                            <tr class="{{ 'lb-top' if row.position <= 3 }}">
+                                <td data-label="#" class="lb-col-pos">
+                                    <span class="lb-pos-pill lb-pos-{{ row.position if row.position <= 3 else 'rest' }}">{{ row.position }}</span>
+                                </td>
+                                <td data-label="Player">
+                                    <a href="{{ url_for('public_profile', user_id=row.user.id) }}" class="user-cell user-cell-link">
+                                        <img
+                                            src="{{ url_for('static', filename=row.user.avatar_path) if row.user.avatar_path else 'https://ui-avatars.com/api/?name=' + (row.user.username | urlencode) + '&size=64&background=4f46e5&color=fff&bold=true' }}"
+                                            alt="{{ row.user.username }}"
+                                        >
+                                        <div>
+                                            <strong>{{ row.user.username }}</strong>
+                                            <small>{{ row.user.full_name if row.user.full_name else '—' }}</small>
+                                        </div>
+                                    </a>
+                                </td>
+                                <td data-label="Account">{{ row.account.account_name }}</td>
+                                <td data-label="Rank">
+                                    {% if row.tier >= 0 %}
+                                        <span class="lb-rank-pill" title="Tier {{ row.tier + 1 }} of {{ rank_tiers|length }}">{{ row.tier_label }}</span>
+                                    {% else %}
+                                        <span class="lb-rank-pill lb-rank-unranked" title="Not a recognized tier for {{ selected_game }}">{{ row.tier_label or 'Unranked' }}</span>
+                                    {% endif %}
+                                </td>
+                                <td data-label="Level" class="cell-mono">{{ row.account.level }}</td>
+                                <td data-label="Region"><span class="region-tag">{{ row.account.region }}</span></td>
+                                <td data-label="Status">
+                                    <span class="badge {{ 'badge-active' if row.account.status == 'Active' else 'badge-inactive' }}">{{ row.account.status }}</span>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state lb-empty">
+                <h3>No ranked players for {{ selected_game }} yet</h3>
+                <p>Add a {{ selected_game }} account on your dashboard to appear here.</p>
+                <a class="header-btn nav-btn" href="{{ url_for('dashboard') }}">Go to Dashboard</a>
+            </div>
+        {% endif %}
+    </section>
+{% endblock %}
