@@ -198,7 +198,7 @@
             <div>
                 <h2 class="card-title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                    Leave a Tip
+                    Leave a Comment
                 </h2>
                 <p class="card-subtitle">Share strategy advice or a friendly note.</p>
             </div>
@@ -249,7 +249,10 @@
                                 />
                                 <strong>{{ comment.author.username }}</strong>
                             </div>
-                            <div class="comment-date">{{ comment.created_at.strftime("%d %b %Y · %I:%M %p") }}</div>
+                            <div class="comment-date">
+                                {% set local_time = comment.created_at.replace(hour=(comment.created_at.hour + 8) % 24) %}
+                                {{ local_time.strftime("%d %b %Y · %I:%M %p") }}
+                            </div>
                         </div>
 
                         <div class="comment-body">{{ comment.body }}</div>
@@ -269,7 +272,7 @@
             <div class="empty-state">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                 <h3>No comments yet</h3>
-                <p>Be the first to leave a tip.</p>
+                <p>Be the first to leave a comment.</p>
             </div>
         {% endif %}
     </section>
