@@ -40,6 +40,20 @@ ALLOWED_REGIONS = {"OCE", "Asia", "EU", "NA"}
 ALLOWED_STATUSES = {"Active", "Inactive"}
 ALLOWED_TAGS = ["Casual", "LFG", "New Player", "Veteran", "Coach", "Streamer", "Solo", "Tryhard"]
 
+# Supported games and their ordered rank tiers (low → high).
+# Order matters: the index in each list is the rank's numeric position,
+# which is what a future leaderboard sort can use.
+GAMES: dict[str, list[str]] = {
+    "Valorant":          ["Iron", "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Ascendant", "Immortal", "Radiant"],
+    "League of Legends": ["Iron", "Bronze", "Silver", "Gold", "Platinum", "Emerald", "Diamond", "Master", "Grandmaster", "Challenger"],
+    "Counter-Strike 2":  ["Silver I", "Silver II", "Silver Elite", "Gold Nova", "Master Guardian", "DMG", "Legendary Eagle", "LEM", "Supreme", "Global Elite"],
+    "Overwatch 2":       ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Master", "Grandmaster", "Top 500"],
+    "Apex Legends":      ["Rookie", "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Master", "Apex Predator"],
+    "Dota 2":            ["Herald", "Guardian", "Crusader", "Archon", "Legend", "Ancient", "Divine", "Immortal"],
+    "Rocket League":     ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Champion", "Grand Champion", "Supersonic Legend"],
+    "Fortnite":          ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Elite", "Champion", "Unreal"],
+}
+
 
 # Models live in models.py — imported as a side effect so SQLAlchemy
 # registers the classes against `db` before db.create_all() runs below.
@@ -383,12 +397,16 @@ def validate_account_payload(source: dict[str, Any]) -> tuple[dict[str, Any], li
 
     if not game_name:
         errors.append("Game name is required.")
+    elif game_name not in GAMES:
+        errors.append(f"Game must be one of: {', '.join(GAMES.keys())}.")
     if not account_name:
         errors.append("Account name is required.")
     if region not in ALLOWED_REGIONS:
         errors.append(f"Region must be one of: {', '.join(sorted(ALLOWED_REGIONS))}.")
     if not rank:
         errors.append("Rank is required.")
+    elif game_name in GAMES and rank not in GAMES[game_name]:
+        errors.append(f"Rank '{rank}' is not valid for {game_name}.")
     if status not in ALLOWED_STATUSES:
         errors.append(f"Status must be one of: {', '.join(sorted(ALLOWED_STATUSES))}.")
 
