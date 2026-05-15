@@ -119,11 +119,40 @@ def add_missing_game_account_columns() -> None:
     with db.engine.begin() as connection:
         connection.execute(text("ALTER TABLE game_accounts ADD COLUMN tags VARCHAR(200) NOT NULL DEFAULT ''"))
 
+def add_missing_comment_reply_column() -> None:
+    inspector = inspect(db.engine)
+    if "profile_comments" not in set(inspector.get_table_names()):
+        return
+    columns = {c["name"] for c in inspector.get_columns("profile_comments")}
+    if "parent_id" not in columns:
+        with db.engine.begin() as connection:
+            connection.execute(text("ALTER TABLE profile_comments ADD COLUMN parent_id INTEGER REFERENCES profile_comments(id)"))
+
+def add_missing_comment_likes_table() -> None:
+    inspector = inspect(db.engine)
+    existing_tables = set(inspector.get_table_names())
+    if "comment_likes" not in existing_tables:
+        with db.engine.begin() as connection:
+            connection.execute(text("""
+                CREATE TABLE comment_likes (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL REFERENCES users(id),
+                    comment_id INTEGER NOT NULL REFERENCES profile_comments(id),
+                    vote_type VARCHAR(10) NOT NULL DEFAULT 'up'
+                )
+            """))
+    else:
+        columns = {c["name"] for c in inspector.get_columns("comment_likes")}
+        if "vote_type" not in columns:
+            with db.engine.begin() as connection:
+                connection.execute(text("ALTER TABLE comment_likes ADD COLUMN vote_type VARCHAR(10) NOT NULL DEFAULT 'up'"))
 
 with app.app_context():
     db.create_all()
     add_missing_user_profile_columns()
     add_missing_game_account_columns()
+    add_missing_comment_reply_column()
+    add_missing_comment_likes_table()
 
 
 def get_current_user() -> User | None:
@@ -185,6 +214,21 @@ def admin_required(view_func):
 def inject_current_user():
     return {"current_user": get_current_user()}
 
+@app.template_filter("get_upvotes")
+def get_upvotes(comment_id: int) -> int:
+    from models import CommentLike
+    return CommentLike.query.filter_by(comment_id=comment_id, vote_type="up").count()
+
+@app.template_filter("get_downvotes")
+def get_downvotes(comment_id: int) -> int:
+    from models import CommentLike
+    return CommentLike.query.filter_by(comment_id=comment_id, vote_type="down").count()
+
+@app.template_filter("user_vote")
+def user_vote(user_id: int, comment_id: int) -> str | None:
+    from models import CommentLike
+    vote = CommentLike.query.filter_by(user_id=user_id, comment_id=comment_id).first()
+    return vote.vote_type if vote else None
 
 def parse_dob(raw_value: str) -> date | None:
     raw_value = raw_value.strip()

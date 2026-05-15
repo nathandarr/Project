@@ -58,26 +58,106 @@
 {% endblock %}
 
 {% block content %}
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div class="flash-messages">
-                {% for category, message in messages %}
-                    <div class="flash-message flash-{{ category }}" role="alert">
-                        {% if category == 'success' %}
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                        {% elif category == 'danger' %}
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-                        {% elif category == 'warning' %}
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                        {% else %}
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                        {% endif %}
-                        <span>{{ message }}</span>
-                    </div>
+    {% macro render_comment(comment, viewer, depth=0) %}
+    <div class="comment-item {% if depth > 0 %}comment-reply{% endif %}"
+        data-created="{{ comment.created_at.timestamp() }}"
+        data-upvotes="{{ comment.id | get_upvotes }}"
+        data-depth="{{ depth }}"
+    >
+        <div class="comment-meta">
+            <div class="comment-author">
+                <img
+                    src="{{ url_for('static', filename=comment.author.avatar_path) if comment.author.avatar_path else 'https://ui-avatars.com/api/?name=' + (comment.author.username | urlencode) + '&size=72&background=4f46e5&color=fff&bold=true' }}"
+                    alt="{{ comment.author.username }}"
+                />
+                <strong>{{ comment.author.username }}</strong>
+            </div>
+            <div class="comment-date">
+                {% set local_time = comment.created_at.replace(hour=(comment.created_at.hour + 8) % 24) %}
+                {{ local_time.strftime("%d %b %Y · %I:%M %p") }}
+            </div>
+        </div>
+
+        <div class="comment-body">{{ comment.body }}</div>
+
+        <div class="comment-actions">
+            {% set upvotes = comment.id | get_upvotes %}
+            {% set downvotes = comment.id | get_downvotes %}
+            {% set my_vote = viewer.id | user_vote(comment.id) %}
+
+            <button type="button" class="btn vote-btn upvote-btn {{ 'active' if my_vote == 'up' }}"
+                data-comment-id="{{ comment.id }}" data-vote-type="up">
+                <svg viewBox="0 0 24 24" fill="{{ 'currentColor' if my_vote == 'up' else 'none' }}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+                <span class="upvote-count">{{ upvotes }}</span>
+            </button>
+
+            <button type="button" class="btn vote-btn downvote-btn {{ 'active' if my_vote == 'down' }}"
+                data-comment-id="{{ comment.id }}" data-vote-type="down">
+                <svg viewBox="0 0 24 24" fill="{{ 'currentColor' if my_vote == 'down' else 'none' }}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>
+                <span class="downvote-count">{{ downvotes }}</span>
+            </button>
+
+            <button type="button" class="btn reply-toggle-btn" data-comment-id="{{ comment.id }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>
+                Reply
+            </button>
+
+            {% if comment.replies %}
+                <button type="button" class="btn show-replies-btn" data-comment-id="{{ comment.id }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    Show {{ comment.replies|length }} {{ 'reply' if comment.replies|length == 1 else 'replies' }}
+                </button>
+            {% endif %}
+
+            {% if viewer.id == comment.author_id or viewer.id == comment.profile_user_id %}
+                <form class="inline-form" method="POST" action="{{ url_for('delete_profile_comment', comment_id=comment.id) }}" onsubmit="return confirm('Delete this comment?');">
+                    <button type="submit" class="btn danger-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+                        Delete
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+
+        <div class="reply-form-wrap" id="reply-form-{{ comment.id }}" style="display: none;">
+            <form method="POST" action="{{ url_for('reply_to_comment', comment_id=comment.id) }}" class="reply-form">
+                <textarea name="body" maxlength="500" placeholder="Write a reply..." required></textarea>
+                <div style="display: flex; gap: 8px;">
+                    <button type="submit" class="btn primary-btn btn-sm">Post Reply</button>
+                    <button type="button" class="btn secondary-btn btn-sm cancel-reply-btn" data-comment-id="{{ comment.id }}">Cancel</button>
+                </div>
+            </form>
+        </div>
+
+        {% if comment.replies %}
+            <div class="replies-wrap" id="replies-{{ comment.id }}" style="display: none;">
+                {% for reply in comment.replies %}
+                    {{ render_comment(reply, viewer, depth + 1) }}
                 {% endfor %}
             </div>
         {% endif %}
-    {% endwith %}
+    </div>
+    {% endmacro %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message flash-{{ category }}" role="alert">
+                            {% if category == 'success' %}
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            {% elif category == 'danger' %}
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                            {% elif category == 'warning' %}
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            {% else %}
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                            {% endif %}
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
 
     <section class="profile-hero">
         <div class="profile-banner"></div>
@@ -235,39 +315,21 @@
                 </h2>
                 <p class="card-subtitle">{{ comments|length }} comment{{ '' if comments|length == 1 else 's' }} from the community.</p>
             </div>
+            <div class="sort-buttons">
+                <button type="button" class="sort-btn active" data-sort="newest">Newest</button>
+                <button type="button" class="sort-btn" data-sort="oldest">Oldest</button>
+                <button type="button" class="sort-btn" data-sort="liked">Most Liked</button>
+            </div>
         </div>
 
         {% if comments %}
-            <div class="comment-list">
-                {% for comment in comments %}
-                    <div class="comment-item">
-                        <div class="comment-meta">
-                            <div class="comment-author">
-                                <img
-                                    src="{{ url_for('static', filename=comment.author.avatar_path) if comment.author.avatar_path else 'https://ui-avatars.com/api/?name=' + (comment.author.username | urlencode) + '&size=72&background=4f46e5&color=fff&bold=true' }}"
-                                    alt="{{ comment.author.username }}"
-                                />
-                                <strong>{{ comment.author.username }}</strong>
-                            </div>
-                            <div class="comment-date">
-                                {% set local_time = comment.created_at.replace(hour=(comment.created_at.hour + 8) % 24) %}
-                                {{ local_time.strftime("%d %b %Y · %I:%M %p") }}
-                            </div>
-                        </div>
-
-                        <div class="comment-body">{{ comment.body }}</div>
-
-                        {% if viewer.id == comment.author_id or viewer.id == comment.profile_user_id %}
-                            <form class="inline-form" method="POST" action="{{ url_for('delete_profile_comment', comment_id=comment.id) }}" onsubmit="return confirm('Delete this comment?');">
-                                <button type="submit" class="btn danger-btn">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
-                                    Delete
-                                </button>
-                            </form>
-                        {% endif %}
-                    </div>
-                {% endfor %}
-            </div>
+    <div class="comment-list">
+        {% for comment in comments %}
+            {% if comment.parent_id is none %}
+                {{ render_comment(comment, viewer, 0) }}
+            {% endif %}
+        {% endfor %}
+    </div>
         {% else %}
             <div class="empty-state">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -276,4 +338,129 @@
             </div>
         {% endif %}
     </section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.querySelectorAll('.comment-item[data-depth]').forEach(item => {
+    const depth = parseInt(item.dataset.depth);
+    if (depth > 0) {
+        item.style.marginLeft = Math.min(depth * 24, 72) + 'px';
+    }
+});
+
+document.querySelectorAll('.vote-btn').forEach(btn => {
+    btn.addEventListener('click', async function() {
+        const commentId = this.dataset.commentId;
+        const voteType = this.dataset.voteType;
+
+        const response = await fetch(`/comments/${commentId}/vote`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ vote_type: voteType })
+        });
+
+        const data = await response.json();
+
+        const item = this.closest('.comment-item');
+        const upBtn = item.querySelector('.upvote-btn');
+        const downBtn = item.querySelector('.downvote-btn');
+
+        upBtn.querySelector('.upvote-count').textContent = data.upvotes;
+        downBtn.querySelector('.downvote-count').textContent = data.downvotes;
+
+        upBtn.classList.remove('active');
+        downBtn.classList.remove('active');
+        upBtn.querySelector('svg').setAttribute('fill', 'none');
+        downBtn.querySelector('svg').setAttribute('fill', 'none');
+
+        if (data.user_vote === 'up') {
+            upBtn.classList.add('active');
+            upBtn.querySelector('svg').setAttribute('fill', 'currentColor');
+        } else if (data.user_vote === 'down') {
+            downBtn.classList.add('active');
+            downBtn.querySelector('svg').setAttribute('fill', 'currentColor');
+        }
+
+        item.dataset.upvotes = data.upvotes;
+    });
+});
+
+document.querySelectorAll('.reply-toggle-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const commentId = this.dataset.commentId;
+        const form = document.getElementById(`reply-form-${commentId}`);
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    });
+});
+
+document.querySelectorAll('.cancel-reply-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const commentId = this.dataset.commentId;
+        document.getElementById(`reply-form-${commentId}`).style.display = 'none';
+    });
+});
+
+document.querySelectorAll('.reply-form').forEach(form => {
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const commentId = this.closest('.reply-form-wrap').id.replace('reply-form-', '');
+        const body = this.querySelector('textarea').value.trim();
+
+        if (!body) return;
+
+        const formData = new FormData();
+        formData.append('body', body);
+
+        const response = await fetch(`/comments/${commentId}/reply`, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (response.ok || response.redirected) {
+            window.location.href = window.location.pathname + '#replies-' + commentId;
+            window.location.reload();
+        }
+    });
+});
+
+document.querySelectorAll('.show-replies-btn').forEach(btn => {
+    btn.dataset.originalText = btn.textContent.trim();
+    btn.addEventListener('click', function() {
+        const commentId = this.dataset.commentId;
+        const repliesWrap = document.getElementById(`replies-${commentId}`);
+        const isHidden = repliesWrap.style.display === 'none';
+        repliesWrap.style.display = isHidden ? 'block' : 'none';
+        this.textContent = isHidden ? 'Hide replies' : this.dataset.originalText;
+    });
+});
+
+function sortComments(sortType) {
+    const list = document.querySelector('.comment-list');
+    if (!list) return;
+
+    const comments = Array.from(list.querySelectorAll(':scope > .comment-item'));
+
+    comments.sort((a, b) => {
+        if (sortType === 'newest') {
+            return parseFloat(b.dataset.created) - parseFloat(a.dataset.created);
+        } else if (sortType === 'oldest') {
+            return parseFloat(a.dataset.created) - parseFloat(b.dataset.created);
+        } else if (sortType === 'liked') {
+            return parseInt(b.dataset.upvotes) - parseInt(a.dataset.upvotes);
+        }
+        return 0;
+    });
+
+    comments.forEach(comment => list.appendChild(comment));
+}
+
+document.querySelectorAll('.sort-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        sortComments(this.dataset.sort);
+    });
+});
+</script>
 {% endblock %}

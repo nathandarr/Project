@@ -8,6 +8,7 @@ import os
 
 from flask import flash, redirect, request, url_for
 from werkzeug.utils import secure_filename
+from models import GameAccount, ProfileComment, User, CommentLike
 
 from app import (
     allowed_file,
@@ -191,3 +192,85 @@ def delete_profile_comment(comment_id: int):
 
     flash("Comment deleted successfully.", "info")
     return redirect(url_for("public_profile", user_id=profile_user_id))
+
+@app.route("/comments/<int:comment_id>/vote", methods=["POST"])
+@login_required
+def vote_comment(comment_id: int):
+    from flask import jsonify
+    viewer = get_current_user()
+    if viewer is None:
+        return jsonify({"error": "Not logged in"}), 401
+
+    comment = db.session.get(ProfileComment, comment_id)
+    if comment is None:
+        return jsonify({"error": "Comment not found"}), 404
+
+    vote_type = request.json.get("vote_type")
+    if vote_type not in ("up", "down"):
+        return jsonify({"error": "Invalid vote type"}), 400
+
+    existing = CommentLike.query.filter_by(
+        user_id=viewer.id,
+        comment_id=comment_id
+    ).first()
+
+    if existing:
+        if existing.vote_type == vote_type:
+            db.session.delete(existing)
+        else:
+            existing.vote_type = vote_type
+    else:
+        vote = CommentLike(
+            user_id=viewer.id,
+            comment_id=comment_id,
+            vote_type=vote_type
+        )
+        db.session.add(vote)
+
+    db.session.commit()
+
+    upvotes = CommentLike.query.filter_by(comment_id=comment_id, vote_type="up").count()
+    downvotes = CommentLike.query.filter_by(comment_id=comment_id, vote_type="down").count()
+
+    user_vote = CommentLike.query.filter_by(
+        user_id=viewer.id,
+        comment_id=comment_id
+    ).first()
+
+    return jsonify({
+        "upvotes": upvotes,
+        "downvotes": downvotes,
+        "user_vote": user_vote.vote_type if user_vote else None
+    })
+
+@app.route("/comments/<int:comment_id>/reply", methods=["POST"])
+@login_required
+def reply_to_comment(comment_id: int):
+    viewer = get_current_user()
+    if viewer is None:
+        flash("Please log in to access that page.", "warning")
+        return redirect(url_for("login"))
+
+    parent_comment = db.session.get(ProfileComment, comment_id)
+    if parent_comment is None:
+        flash("Comment not found.", "danger")
+        return redirect(url_for("players"))
+
+    body, errors = validate_comment_body(request.form.get("body", ""))
+
+    if errors:
+        for error in errors:
+            flash(error, "danger")
+        return redirect(url_for("public_profile", user_id=parent_comment.profile_user_id))
+
+    reply = ProfileComment(
+        body=body,
+        author_id=viewer.id,
+        profile_user_id=parent_comment.profile_user_id,
+        parent_id=comment_id,
+    )
+
+    db.session.add(reply)
+    db.session.commit()
+
+    return redirect(url_for("public_profile", user_id=parent_comment.profile_user_id) + "#replies-" + str(comment_id))
